@@ -1,0 +1,24 @@
+import express from "express";
+const router = express.Router()
+let data='{"cells":[{"type":"basic.Circle","size":{"width":130,"height":90},"position":{"x":389.515625,"y":125},"angle":0,"id":"346f7f22-0b9d-45e9-8b49-1c2dd2eec919","z":2,"attrs":{"text":{"text":"Circle"}}},{"type":"basic.Circle","size":{"width":130,"height":90},"position":{"x":389.515625,"y":125},"angle":0,"id":"9642dc8f-3b03-4aca-b66c-6d899db9ed9e","z":2,"attrs":{"text":{"text":"Circle"}}},{"type":"basic.Circle","size":{"width":130,"height":90},"position":{"x":439.515625,"y":175},"angle":0,"id":"864f817f-407a-47b8-995f-34f752ea63e5","z":2,"attrs":{"text":{"text":"Circle"}}},{"type":"basic.Circle","size":{"width":130,"height":90},"position":{"x":439.515625,"y":175},"angle":0,"id":"64eb40c8-c486-4b2e-902c-e2c329ef0482","z":2,"attrs":{"text":{"text":"Circle"}}},{"type":"devs.Atomic","size":{"width":130,"height":90},"inPorts":[""],"outPorts":["",""],"ports":{"groups":{"in":{"position":{"name":"left"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnet":true}},"label":{"position":{"name":"left","args":{"y":10}}}},"out":{"position":{"name":"right"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnet":true}},"label":{"position":{"name":"right","args":{"y":10}}}}},"items":[{"id":"","group":"in","attrs":{".port-label":{"text":""}}}]},"position":{"x":128.515625,"y":309},"angle":0,"id":"65d59b39-0997-4221-ab7f-16cf495c02f5","z":6,"attrs":{}},{"type":"devs.Atomic","size":{"width":130,"height":90},"inPorts":[""],"outPorts":["",""],"ports":{"groups":{"in":{"position":{"name":"left"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnet":true}},"label":{"position":{"name":"left","args":{"y":10}}}},"out":{"position":{"name":"right"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnet":true}},"label":{"position":{"name":"right","args":{"y":10}}}}},"items":[{"id":"","group":"in","attrs":{".port-label":{"text":""}}}]},"position":{"x":128.515625,"y":309},"angle":0,"id":"f8fb261c-32c7-40b9-826d-0ffa4face53b","z":6,"attrs":{}},{"type":"devs.Atomic","size":{"width":130,"height":90},"inPorts":[""],"outPorts":["",""],"ports":{"groups":{"in":{"position":{"name":"left"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnet":true}},"label":{"position":{"name":"left","args":{"y":10}}}},"out":{"position":{"name":"right"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnet":true}},"label":{"position":{"name":"right","args":{"y":10}}}}},"items":[{"id":"","group":"in","attrs":{".port-label":{"text":""}}}]},"position":{"x":128.515625,"y":309},"angle":0,"id":"dca6f0f0-2acd-4fcf-8fc8-0fa16ff20960","z":6,"attrs":{}},{"type":"devs.Atomic","size":{"width":130,"height":90},"inPorts":[""],"outPorts":["",""],"ports":{"groups":{"in":{"position":{"name":"left"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnet":true}},"label":{"position":{"name":"left","args":{"y":10}}}},"out":{"position":{"name":"right"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnet":true}},"label":{"position":{"name":"right","args":{"y":10}}}}},"items":[{"id":"","group":"in","attrs":{".port-label":{"text":""}}}]},"position":{"x":128.515625,"y":309},"angle":0,"id":"ad741f8e-acdf-429e-871a-e94268518e17","z":6,"attrs":{}},{"type":"devs.Atomic","size":{"width":130,"height":90},"inPorts":[""],"outPorts":["",""],"ports":{"groups":{"in":{"position":{"name":"left"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnet":true}},"label":{"position":{"name":"left","args":{"y":10}}}},"out":{"position":{"name":"right"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnnet":true}},"label":{"position":{"name":"left","args":{"y":10}}}},"out":{"position":{"name":"right"},"attrs":{".port-label":{"fill":"#000"},".port-body":{"fill":"#fff","stroke":"#000","r":10,"magnet":true}},"label":{"position":{"name":"right","args":{"y":10}}}}},"items":[{"id":"","group":"in","attrs":{".port-label":{"text":""}}}]},"position":{"x":448,"y":259},"angle":0,"id":"982026d9-ad51-4583-a942-dcb1dc3ffb67","z":6,"attrs":{}}]}'
+
+router.route('/').get((req, res) => {
+  
+ 
+    res.json(data)
+})
+
+router.route('/').post((req, res) => {
+    console.log("posted");
+    console.log(req.body);
+    res.json({message:"sucessfull"})
+
+})
+
+
+
+
+
+
+
+export default router

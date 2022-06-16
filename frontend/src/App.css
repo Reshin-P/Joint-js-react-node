@@ -1,0 +1,41 @@
+.main-div{
+    margin: 50px;
+  }
+  .main-row{
+    height: 920px;
+  }
+  
+  .col1{
+    /* border: red solid 1px; */
+    background-color: #383b61;
+   
+  }
+  
+  .col2{
+    border: rgb(54, 52, 52) solid 1px;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGlkPSJ2LTQiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzIGlkPSJ2LTMiPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuXzAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHg9IjAiIHk9IjAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+PHJlY3QgaWQ9InYtNSIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI0FBQUFBQSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgaWQ9InYtNyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuXzApIi8+PC9zdmc+");
+  }
+  .heading{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 60px;
+    border-bottom: wheat 1px solid;
+  }
+  .shapes-row{
+    /* border:  2px red solid; */
+    height: 90px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-evenly;
+  }
+  
+  .shapes{
+    width: 45%;
+    /* border: solid 1px rgb(100, 100, 100); */
+  }
+  
+  .shapeImage{
+    width: 100%;
+    height: 100%;
+  }

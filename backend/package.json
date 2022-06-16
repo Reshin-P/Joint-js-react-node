@@ -1,0 +1,20 @@
+{
+  "type": "module",
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "to lerarn joint js",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon Server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "reshin",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "nodemon": "^2.0.16",
+    "pg": "^8.7.3"
+  }
+}
