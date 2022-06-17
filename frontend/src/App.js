@@ -18,11 +18,10 @@ function App() {
   const [paper, setPaper] = useState()
   const [flyPaper, setFlyPaper] = useState()
   const [fullArea, setFullArea] = useState()
-  let count=0
+  const [flyshape, setFlay] = useState()
+  let count = 0
 
-  // THREE DRAW AREAS
-  const drawArea1 = useRef()
-  const drawArea2 = useRef()
+
 
 
   // GET SAVED GRAPH SETTINGS FROM BACKEND
@@ -64,33 +63,36 @@ function App() {
 
   //USEEFFECT FOR SETTING SHAPES MODELS
   useEffect(() => {
-console.log("useeEffect");
+    console.log("useeEffect");
     const getdata = async () => {
       let { data } = await axios.get('/user')
-      data=null
+
       if (data) {
-        data=JSON.parse(data)
+        data = JSON.parse(data)
         graph1.fromJSON(data)
-  }
+      }
 
-    setStencilPaper(new dia.Paper({
-      el: drawArea1.current,
-      model: stencilGraph,
-      cellViewNamespace: shapes 
-    }))
-    setPaper(new dia.Paper({
-      el: drawArea2.current,
-      model: graph1,
-      cellViewNamespace: shapes 
-    }))
+      // Canvas from which you take shapes
+      setStencilPaper(new dia.Paper({
+        el: $('#drawArea1'),
+        model: stencilGraph,
+        cellViewNamespace: shapes
+      }))
 
-    stencilGraph.addCells([rectangleShape, circleShape, rhombusShape, EllipseShape, imageShape, atomicShape]);
-  
-}
-getdata();
+      // Canvas where sape are dropped
+      setPaper(new dia.Paper({
+        el: $('#drawArea2'),
+        model: graph1,
+        cellViewNamespace: shapes
+      }))
+
+      stencilGraph.addCells([rectangleShape, circleShape, rhombusShape, EllipseShape, imageShape, atomicShape]);
+
+    }
+    getdata();
 
 
-  }, [ ])
+  }, [])
 
   //------------------------------------------------------------------->>
 
@@ -100,7 +102,7 @@ getdata();
     // graph1.set('graphCustomProperty', true);
     // graph1.set('graphExportTime', Date.now());
     let jsonObject = graph1.toJSON();
-    let jsonString=JSON.stringify(jsonObject)
+    let jsonString = JSON.stringify(jsonObject)
 
     // const { data } = await axios.post('/user', {data:jsonString})
 
@@ -109,15 +111,17 @@ getdata();
 
   // STENCILPAPER POINTER EVENT 
   if (stencilPaper) {
+    stencilPaper.on('cell:pointerup', function (cellView, e, x, y) {
 
+      $('#flyPaper').remove();
+    })
     stencilPaper.on('cell:pointerdown', function (cellView, e, x, y) {
 
-      console.log("ponter>>>>>>----",count++);
-      
-      $('body').append('<div id="flyPaper"  style="position:fixed;z-index:100;opacity:.7;pointer-event:none;background-color: red;"></div>');
+
+      $('body').append('<div id="flyPaper" style="position:fixed;z-index:100;pointer-event:none;background-color: rgb(146, 172, 32);"></div>');
 
       setFlyPaper(new dia.Paper({
-        el: ('#flyPaper'),
+        el: $('#flyPaper'),
         model: flyGraph,
         interactive: false
       }))
@@ -131,17 +135,14 @@ getdata();
         x: x - pos.x,
         y: y - pos.y
       };
-      
+
 
       flyShape.position(0, 0);
       flyGraph.addCell(flyShape)
-      console.log("1st",   $("#flyPaper").offset());
-      console.log(e.pageX,e.pageY);
       $("#flyPaper").offset({
         left: e.pageX - offset.x,
         top: e.pageY - offset.y
       });
-      console.log( ">>>",  $("#flyPaper").offset());
 
 
       $('body').on('mousemove.fly', function (e) {
@@ -154,26 +155,24 @@ getdata();
         var x = e.pageX,
           y = e.pageY,
           target = paper.$el.offset()
-    
+
 
 
         // Dropped over paper ?
 
         if (x > target.left && x < target.left + paper.$el.width() && y > target.top && y < target.top + paper.$el.height()) {
-          console.log("success");
           var s = flyShape.clone();
           s.position(x - target.left - offset.x, y - target.top - offset.y);
           graph1.addCell(s);
         }
-        
+
         $('body').off('mousemove.fly').off('mouseup.fly');
         flyShape.remove()
-  $('#flyPaper').remove();
- 
-  console.log("flyyyy",flyShape);
-       
-        
-     
+        $('#flyPaper').remove();
+
+
+
+
       });
     });
   }
@@ -185,14 +184,14 @@ getdata();
     <div id='body' className='main-div'>
 
       <Row className='main-row'>
-        {/* <div id='temp' style={{backgroundColor:"red"}}>joo</div> */}
+
         <Col className='col1' sm={12} md={12} lg={2} xl={2} >
-          <div  ref={drawArea1}  ></div>
+          <div id='drawArea1'  ></div>
 
         </Col>
         <Col style={{ backgroundColor: 'white' }} className='col2' sm={12} md={10} lg={10} xl={10} >
 
-          <div ref={drawArea2} ></div>
+          <div id='drawArea2'></div>
         </Col>
       </Row>
 
