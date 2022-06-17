@@ -18,6 +18,7 @@ function App() {
   const [paper, setPaper] = useState()
   const [flyPaper, setFlyPaper] = useState()
   const [fullArea, setFullArea] = useState()
+  let count=0
 
   // THREE DRAW AREAS
   const drawArea1 = useRef()
@@ -63,17 +64,15 @@ function App() {
 
   //USEEFFECT FOR SETTING SHAPES MODELS
   useEffect(() => {
-
+console.log("useeEffect");
     const getdata = async () => {
       let { data } = await axios.get('/user')
-      
-      console.log("data",data);
+      data=null
       if (data) {
         data=JSON.parse(data)
-        console.log("after",data);
         graph1.fromJSON(data)
-    
-    setFullArea(document.getElementById('body'))
+  }
+
     setStencilPaper(new dia.Paper({
       el: drawArea1.current,
       model: stencilGraph,
@@ -86,13 +85,12 @@ function App() {
     }))
 
     stencilGraph.addCells([rectangleShape, circleShape, rhombusShape, EllipseShape, imageShape, atomicShape]);
-  }
   
 }
 getdata();
 
 
-  }, [fullArea, stencilGraph])
+  }, [ ])
 
   //------------------------------------------------------------------->>
 
@@ -114,8 +112,8 @@ getdata();
 
     stencilPaper.on('cell:pointerdown', function (cellView, e, x, y) {
 
-
-      console.log("ponter");
+      console.log("ponter>>>>>>----",count++);
+      
       $('body').append('<div id="flyPaper"  style="position:fixed;z-index:100;opacity:.7;pointer-event:none;background-color: red;"></div>');
 
       setFlyPaper(new dia.Paper({
@@ -133,14 +131,18 @@ getdata();
         x: x - pos.x,
         y: y - pos.y
       };
+      
 
       flyShape.position(0, 0);
       flyGraph.addCell(flyShape)
-      console.log("flygraph", flyGraph);
+      console.log("1st",   $("#flyPaper").offset());
+      console.log(e.pageX,e.pageY);
       $("#flyPaper").offset({
         left: e.pageX - offset.x,
         top: e.pageY - offset.y
       });
+      console.log( ">>>",  $("#flyPaper").offset());
+
 
       $('body').on('mousemove.fly', function (e) {
         $("#flyPaper").offset({
@@ -152,20 +154,26 @@ getdata();
         var x = e.pageX,
           y = e.pageY,
           target = paper.$el.offset()
+    
 
 
         // Dropped over paper ?
 
         if (x > target.left && x < target.left + paper.$el.width() && y > target.top && y < target.top + paper.$el.height()) {
+          console.log("success");
           var s = flyShape.clone();
           s.position(x - target.left - offset.x, y - target.top - offset.y);
-          console.log(">>>Ssss", s);
           graph1.addCell(s);
         }
-        $('body ').off('mousemove.fly').off('mouseup.fly');
-        flyShape.remove();
-        $('#flyPaper').remove();
-
+        
+        $('body').off('mousemove.fly').off('mouseup.fly');
+        flyShape.remove()
+  $('#flyPaper').remove();
+ 
+  console.log("flyyyy",flyShape);
+       
+        
+     
       });
     });
   }
@@ -177,8 +185,9 @@ getdata();
     <div id='body' className='main-div'>
 
       <Row className='main-row'>
+        {/* <div id='temp' style={{backgroundColor:"red"}}>joo</div> */}
         <Col className='col1' sm={12} md={12} lg={2} xl={2} >
-          <div ref={drawArea1}  ></div>
+          <div  ref={drawArea1}  ></div>
 
         </Col>
         <Col style={{ backgroundColor: 'white' }} className='col2' sm={12} md={10} lg={10} xl={10} >
