@@ -13,7 +13,9 @@ export const rectangleShape = new shapes.basic.Rect({
       text: {
         text: 'Rectangle',
       }
-    }
+    },
+    inPorts: [''],
+    outPorts: ['', '']
   });
 
   export const  circleShape = new shapes.basic.Circle({
@@ -27,9 +29,11 @@ export const rectangleShape = new shapes.basic.Rect({
     },
     attrs: {
       text: {
-        text: 'Circle'
+        text: 'd'
       }
-    }
+    },
+    inPorts: [''],
+    outPorts: ['', '']
   });
   
   export const rhombusShape = new shapes.basic.Rhombus({
@@ -64,18 +68,18 @@ export const rectangleShape = new shapes.basic.Rect({
     }
   });
 
-  export const imageShape = new shapes.basic.TextBlock({
+  export const imageShape = new shapes.devs.Coupled({
     position: {
         x: 10,
-        y: 290
+        y: 490
     },
     size: {
-      width: 130,
-      height: 90
+      width: 230,
+      height: 270
     },
     attrs: {
       text: {
-        text: 'Ellipse'
+        text: 'ss'
       }
     }
   });
@@ -91,5 +95,5 @@ export const rectangleShape = new shapes.basic.Rect({
     },
   
     inPorts: [''],
-    outPorts: ['', '']
+    outPorts: ['', ''," "]
   });
