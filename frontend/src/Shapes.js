@@ -71,15 +71,15 @@ export const rectangleShape = new shapes.basic.Rect({
   export const imageShape = new shapes.devs.Coupled({
     position: {
         x: 10,
-        y: 490
+        y: 290
     },
     size: {
-      width: 230,
-      height: 270
+      width: 130,
+      height: 90
     },
     attrs: {
       text: {
-        text: 'ss'
+        text: 'Test'
       }
     }
   });
