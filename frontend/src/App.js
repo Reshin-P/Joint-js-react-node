@@ -25,6 +25,9 @@ function App() {
   const [showColorsOption, setShowColorsoption] = useState(false);
   const [showColors, setShowColors] = useState(false);
   const [selectLink, setSelectLink] = useState(null);
+
+  const [pdfDownload, setPdfDownload] = useState(null);
+  const [exportSvg, setExportSvg] = useState(null);
   //TO HANDLE ELEMENT RESIZING
   const handleElementSize = () => {
     if (!selectWidth) {
@@ -44,6 +47,7 @@ function App() {
     const getdata = async () => {
       let { data } = await axios.get("/user");
       data = JSON.parse(data);
+
       graph.fromJSON(data);
     };
 
@@ -331,12 +335,15 @@ function App() {
 
       const { data } = await axios.post("/user", { data: jsonString });
     });
-    var link = new dia.Link({});
 
-    link.on("change", function () {
-      alert("source of the link changed");
-    });
-  }, []);
+    if (pdfDownload) {
+      var svgDoc = paper.svg;
+      console.log("svag", svgDoc);
+      // var serializer = new XMLSerializer();
+      // var svgString = serializer.serializeToString(svgDoc);
+      setExportSvg(svgDoc);
+    }
+  }, [pdfDownload]);
 
   // TO HANDLE LINK COLOR
   const handleLinkColor = (color) => {
@@ -408,9 +415,15 @@ function App() {
       },
     });
   };
-  
+
+  const downloadpdf = () => {
+    console.log("-----");
+    setPdfDownload(!pdfDownload);
+  };
+
   return (
     <div className="main-div">
+      <button onClick={downloadpdf}>downlaod</button>
       <Row className="main-row">
         <Col className="col1" sm={12} md={12} lg={2} xl={2}>
           <div id="stencil"></div>
@@ -644,6 +657,11 @@ function App() {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+          {exportSvg && (
+            <div>
+              <img width={"100%"} src={exportSvg}></img>
             </div>
           )}
         </Col>
