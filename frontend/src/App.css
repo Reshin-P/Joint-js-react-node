@@ -9,7 +9,7 @@
 
 .col1 {
 
-  background-color: #bf390b;
+  background-color: #383b61;
 }
 
 .col2 {
@@ -18,8 +18,8 @@
 }
 .col3 {
   margin-top: 20px;
-  /* background-color: #383b61; */
-  background-color: #bf390b;
+  background-color: #383b61;
+  /* background-color: #bf390b; */
   height: 750px;
 }
 .heading {
@@ -55,4 +55,63 @@
 .size-select {
   width: 40%;
   border: 1px solid black;
+}
+.choose-color{
+  display: flex;
+  justify-content: space-between;
+  width: 45%;
+}
+
+.color-div{
+  padding: 2px;
+  width: 35%;
+  border: 2px solid rgb(240, 233, 233);
+  height: auto;
+}
+
+.color-div2{
+  margin-top: 7px;
+display: flex;
+justify-content: space-between;
+}
+
+.colorss{
+  border: black solid 1px;
+  width: 20%;
+  height: 20px;
+  background-color: #0ae928;
+}
+
+.connection-main{
+
+  /* border: solid red 1px; */
+  color: white;
+}
+.connections{
+  display: flex;
+  padding-left: 20px;
+}
+.connection-inner{
+  width: 50%;
+  display: flex;
+  justify-content: space-between;
+}
+.connect{
+  border: 1px solid rgb(182, 165, 165);
+}
+.thick-main{
+  height: 50px;
+  display: flex;
+  justify-content: center;
+}
+.thick-inner{
+  width: 90%;
+
+  display: flex;
+  justify-content: space-between;
+
+}
+.thick{
+  width: 20%;
+  border: 1px solid rgb(182, 165, 165);
 }

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="paper"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.4.0/backbone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jointjs/3.4.4/joint.js"></script>
+    <div style="background-color: red;" id="stencil"></div>
+    <div style="background-color: rgb(146, 172, 32);" id="paper"></div>
+    <script>
+        (function() {
+
+var namespace = joint.shapes;
+var graph = new joint.dia.Graph({}, { cellNamespace: namespace });
+new joint.dia.Paper({ 
+    el: document.getElementById('paper'),
+    width: 650,
+    height: 200,
+    gridSize: 1,
+    model: graph, 
+    cellViewNamespace: namespace,
+    linkPinning: false, // Prevent link being dropped in blank paper area
+   
+ 
+});
+
+
+var portsIn = {
+    position: {
+        name: 'left'
+    },
+    attrs: {
+        portBody: {
+            magnet: true,
+            r: 10,
+            fill: '#023047',
+            stroke: '#023047'
+        }
+    },
+    label: {
+        position: {
+            name: 'left',
+            args: { y: 6 } 
+        },
+        markup: [{
+            tagName: 'text',
+            selector: 'label',
+            className: 'label-text'
+        }]
+    },
+    markup: [{
+        tagName: 'circle',
+        selector: 'portBody'
+    }]
+};
+
+var portsOut = {
+    position: {
+        name: 'right'
+    },
+    attrs: {
+        portBody: {
+            magnet: true,
+            r: 10,
+            fill: '#E6A502',
+            stroke:'#023047'
+        }
+    },
+    label: {
+        position: {
+            name: 'right',
+            args: { y: 6 }
+        },
+        markup: [{
+            tagName: 'text',
+            selector: 'label',
+            className: 'label-text'
+        }]
+    },
+    markup: [{
+        tagName: 'circle',
+        selector: 'portBody'
+    }]
+};
+
+
+var model = new joint.shapes.standard.Rectangle({
+    position: { x: 275, y: 50 },
+    size: { width: 90, height: 90 },
+    attrs: {
+        body: {
+            fill: '#8ECAE6',
+        },
+        label: { 
+            text: 'Model',
+            fontSize: 16,
+            y: -10
+        }
+    },
+    ports: {
+        groups: {
+            'in': portsIn,
+            'out': portsOut
+        }
+    }
+});
+
+
+model.addPorts([
+    { 
+        group: 'in',
+        attrs: { label: { text: 'in1' }}
+    },
+    { 
+        group: 'in',
+        attrs: { label: { text: 'in2' }}
+    },
+    { 
+        group: 'out',
+        attrs: { label: { text: 'out' }}
+    }
+]);
+
+graph.addCell(model);
+}());
+    </script>
+</body>
+</html>
