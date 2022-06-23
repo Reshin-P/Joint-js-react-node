@@ -28,6 +28,8 @@ function App() {
 
   const [pdfDownload, setPdfDownload] = useState(null);
   const [exportSvg, setExportSvg] = useState(null);
+
+  var paper=null
   //TO HANDLE ELEMENT RESIZING
   const handleElementSize = () => {
     if (!selectWidth) {
@@ -198,14 +200,17 @@ function App() {
     //   },
     // ]);
 
-    var canvas = $("#canvas");
+    var total = $("#total");
+    console.log(total.outerHeight());
+    console.log(total.outerWidth());
+   
 
     // Canvas where sape are dropped
-    var graph = new dia.Graph({}, { cellNamespace: shapes }),
+    var graph = new dia.Graph({}, { cellNamespace: shapes })
       paper = new dia.Paper({
         el: $("#paper"),
-        width: canvas.outerWidth(),
-        height: canvas.outerHeight(),
+        width: total.outerWidth(),
+        height: total.outerHeight(),
         model: graph,
         defaultLink: () => new shapes.standard.Link(),
         linkPinning: false,
@@ -234,15 +239,10 @@ function App() {
     // TO SELECT ELEMENT FROM THE PAPER
 
     paper.on("link:pointerup", (linkView) => {
-      setSizeChange(false);
-      setShowColorsoption(true);
-      console.log("dfdfd");
-      // console.log(linkView);
-      // linkView.model.attr('line/stroke', 'orange');
-      // linkView.model.connector('rounded');
-      setSelectLink(linkView);
+      // setSizeChange(false);
+      // setShowColorsoption(true);
+      // setSelectLink(linkView);
 
-      linkView.model.router("orthogonal");
     });
 
     paper.on("cell:pointerdown", function (cellView, e, x, y) {
@@ -336,14 +336,8 @@ function App() {
       const { data } = await axios.post("/user", { data: jsonString });
     });
 
-    if (pdfDownload) {
-      var svgDoc = paper.svg;
-      console.log("svag", svgDoc);
-      // var serializer = new XMLSerializer();
-      // var svgString = serializer.serializeToString(svgDoc);
-      setExportSvg(svgDoc);
-    }
-  }, [pdfDownload]);
+  
+  }, []);
 
   // TO HANDLE LINK COLOR
   const handleLinkColor = (color) => {
@@ -417,8 +411,43 @@ function App() {
   };
 
   const downloadpdf = () => {
-    console.log("-----");
-    setPdfDownload(!pdfDownload);
+console.log(">>>>>",paper.svg);
+    var svgDoc = paper.svg;
+
+    var serializer = new XMLSerializer();
+
+    var data = serializer.serializeToString(svgDoc);
+    console.log(">>>",data);
+   
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+    var DOMURL = window.URL || window.webkitURL || window;
+
+    var img = new Image();
+    var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
+    var url = DOMURL.createObjectURL(svg);
+
+    img.onload = function () {
+      ctx.drawImage(img, 0, 0);
+      DOMURL.revokeObjectURL(url);
+    };
+
+    img.src = url;
+    setTimeout(() => {
+      var canvas = document.getElementById("canvas");
+      canvas.style.backgroundColor = "#FFFFFF";
+    
+      var image = canvas.toDataURL("image/png", 1.0);
+      
+      var link = document.createElement("a");
+      link.download = "my-image.png";
+  
+      link.href = image;
+      link.click();
+     
+    }, 2000);
+  
   };
 
   return (
@@ -428,7 +457,7 @@ function App() {
         <Col className="col1" sm={12} md={12} lg={2} xl={2}>
           <div id="stencil"></div>
         </Col>
-        <Col id="canvas" className="col2" sm={12} md={8} lg={8} xl={8}>
+        <Col id="total" className="col2" sm={12} md={8} lg={8} xl={8}>
           <div id="paper"></div>
         </Col>
         <Col className="col3" sm={12} md={12} lg={2} xl={2}>
@@ -483,6 +512,7 @@ function App() {
               <div className="choose-color">
                 <h2 style={{ color: "white" }}>Color</h2>
                 <img
+                alt=""
                   onClick={() => {
                     setShowColors(!showColors);
                   }}
@@ -666,6 +696,8 @@ function App() {
           )}
         </Col>
       </Row>
+      <canvas id="canvas"  style={{border:'1px solid red',width:'100%',height:'100%',display:'none'}} ></canvas>
+
     </div>
   );
 }
