@@ -26,12 +26,13 @@ function App() {
   const [showColors, setShowColors] = useState(false);
   const [selectLink, setSelectLink] = useState(null);
 
-
+  const [paper, setPaper] = useState();
+  const [graph, setGraph] = useState(
+    new dia.Graph({}, { cellNamespace: shapes })
+  );
 
   const [exportSvg, setExportSvg] = useState(null);
 
-  var paper=null
- 
   //TO HANDLE ELEMENT RESIZING
   const handleElementSize = () => {
     if (!selectWidth) {
@@ -47,6 +48,21 @@ function App() {
   //------------------------------------------------------------->>
 
   useEffect(() => {
+    var total = $("#total");
+    setPaper(
+      new dia.Paper({
+        el: $("#paper"),
+        width: total.outerWidth(),
+        height: total.outerHeight(),
+        model: graph,
+        defaultLink: () => new shapes.standard.Link(),
+        linkPinning: false,
+        cellViewNamespace: shapes,
+      })
+    );
+  }, []);
+
+  useEffect(() => {
     // TOOLS FOR THE ELEMENTS
     const getdata = async () => {
       let { data } = await axios.get("/user");
@@ -57,11 +73,6 @@ function App() {
 
     getdata();
 
-    var boundaryTool = new elementTools.Boundary();
-    var removeButton = new elementTools.Remove();
-    var toolsView = new dia.ToolsView({
-      tools: [boundaryTool, removeButton],
-    });
     // CUSTOM ELEMETS SVG
 
     let sales = [
@@ -183,44 +194,13 @@ function App() {
       },
     });
 
-    // generalModel.addPorts([
-    //   {
-    //     group: "in",
-    //     attrs: { label: { text: "in1" } },
-    //   },
-    //   {
-    //     group: "in",
-    //     attrs: { label: { text: "in2" } },
-    //   },
-    //   {
-    //     group: "out",
-    //     attrs: { label: { text: "out" } },
-    //   },
-    //   {
-    //     group: "out",
-    //     attrs: { label: { text: "out" } },
-    //   },
-    // ]);
-
     var total = $("#total");
-    console.log(total.outerHeight());
-    console.log(total.outerWidth());
-   
+
 
     // Canvas where sape are dropped
-    var graph = new dia.Graph({}, { cellNamespace: shapes })
-      paper = new dia.Paper({
-        el: $("#paper"),
-        width: total.outerWidth(),
-        height: total.outerHeight(),
-        model: graph,
-        defaultLink: () => new shapes.standard.Link(),
-        linkPinning: false,
-        cellViewNamespace: shapes,
-      });
 
     // Canvas from which you take shapes
-    var stencilGraph = new dia.Graph(),
+    var stencilGraph = new dia.Graph({}, { cellNamespace: shapes }),
       stencilPaper = new dia.Paper({
         el: $("#stencil"),
         model: stencilGraph,
@@ -238,112 +218,111 @@ function App() {
       generalModel.position(30, 430),
     ]);
 
-    // TO SELECT ELEMENT FROM THE PAPER
-
-    paper.on("link:pointerup", (linkView) => {
-      // setSizeChange(false);
-      // setShowColorsoption(true);
-      // setSelectLink(linkView);
-
-    });
-
-    paper.on("cell:pointerdown", function (cellView, e, x, y) {
-      if (!cellView.model.isLink()) {
-        cellView.addTools(toolsView);
-        setSizeChange(true);
-        setElement(cellView);
-        setShowColorsoption(false);
-        setShowColors(false);
-      }
+    var boundaryTool = new elementTools.Boundary();
+    var removeButton = new elementTools.Remove();
+    var toolsView = new dia.ToolsView({
+      tools: [boundaryTool, removeButton],
     });
 
     // TO SELECT ELEMENT FROM THE STENCILPAPER
-    stencilPaper.on("cell:pointerdown", function (cellView, e, x, y) {
-      $("body").append(
-        '<div id="flyPaper" style="position:fixed;z-index:100;opacity:.7;pointer-event:none;"></div>'
-      );
-      var flyGraph = new dia.Graph(),
-        flyPaper = new dia.Paper({
-          el: $("#flyPaper"),
-          model: flyGraph,
-          interactive: false,
-        }),
-        flyShape = cellView.model.clone(),
-        pos = cellView.model.position(),
-        offset = {
-          x: x - pos.x,
-          y: y - pos.y,
-        };
-
-      flyShape.position(0, 0);
-      flyGraph.addCell(flyShape);
-      $("#flyPaper").offset({
-        left: e.pageX - offset.x,
-        top: e.pageY - offset.y,
+    if (paper) {
+      paper.on("link:pointerup", (linkView) => {
+        setSizeChange(false);
+        setShowColorsoption(true);
+        setSelectLink(linkView);
       });
 
-      $("body").on("mousemove.fly", function (e) {
+      paper.on("cell:pointerdown", function (cellView, e, x, y) {
+        if (!cellView.model.isLink()) {
+          cellView.addTools(toolsView);
+          setSizeChange(true);
+          setElement(cellView);
+          setShowColorsoption(false);
+          setShowColors(false);
+        }
+      });
+
+      paper.on("cell:pointerup", async function (cell) {
+        let jsonObject = graph.toJSON();
+        let jsonString = JSON.stringify(jsonObject);
+
+        const { data } = await axios.post("/user", { data: jsonString });
+      });
+      stencilPaper.on("cell:pointerdown", function (cellView, e, x, y) {
+        $("body").append(
+          '<div id="flyPaper" style="position:fixed;z-index:100;opacity:.7;pointer-event:none;"></div>'
+        );
+        var flyGraph = new dia.Graph(),
+          flyPaper = new dia.Paper({
+            el: $("#flyPaper"),
+            model: flyGraph,
+            interactive: false,
+          }),
+          flyShape = cellView.model.clone(),
+          pos = cellView.model.position(),
+          offset = {
+            x: x - pos.x,
+            y: y - pos.y,
+          };
+
+        flyShape.position(0, 0);
+        flyGraph.addCell(flyShape);
         $("#flyPaper").offset({
           left: e.pageX - offset.x,
           top: e.pageY - offset.y,
         });
+
+        $("body").on("mousemove.fly", function (e) {
+          $("#flyPaper").offset({
+            left: e.pageX - offset.x,
+            top: e.pageY - offset.y,
+          });
+        });
+        $("body").on("mouseup.fly", function (e) {
+          var x = e.pageX,
+            y = e.pageY,
+            target = paper.$el.offset();
+
+          // Dropped over paper ?
+
+          if (
+            x > target.left &&
+            x < target.left + paper.$el.width() &&
+            y > target.top &&
+            y < target.top + paper.$el.height()
+          ) {
+            var s = flyShape.clone();
+            s.position(x - target.left - offset.x, y - target.top - offset.y);
+            s.addPorts([
+              {
+                group: "in",
+                attrs: { label: { text: "in1" } },
+              },
+              {
+                group: "in",
+                attrs: { label: { text: "in2" } },
+              },
+              {
+                group: "out",
+                attrs: { label: { text: "out" } },
+              },
+              {
+                group: "out",
+                attrs: { label: { text: "out" } },
+              },
+            ]);
+            graph.addCell(s);
+          }
+          $("body").off("mousemove.fly").off("mouseup.fly");
+          flyShape.remove();
+          $("#flyPaper").remove();
+        });
       });
-      $("body").on("mouseup.fly", function (e) {
-        var x = e.pageX,
-          y = e.pageY,
-          target = paper.$el.offset();
-
-        // Dropped over paper ?
-
-        if (
-          x > target.left &&
-          x < target.left + paper.$el.width() &&
-          y > target.top &&
-          y < target.top + paper.$el.height()
-        ) {
-          var s = flyShape.clone();
-          s.position(x - target.left - offset.x, y - target.top - offset.y);
-          s.addPorts([
-            {
-              group: "in",
-              attrs: { label: { text: "in1" } },
-            },
-            {
-              group: "in",
-              attrs: { label: { text: "in2" } },
-            },
-            {
-              group: "out",
-              attrs: { label: { text: "out" } },
-            },
-            {
-              group: "out",
-              attrs: { label: { text: "out" } },
-            },
-          ]);
-          graph.addCell(s);
-        }
-        $("body").off("mousemove.fly").off("mouseup.fly");
-        flyShape.remove();
-        $("#flyPaper").remove();
-      });
-    });
-    //------------------------------------------->
-    // CHANGE SHAPES ELMENTS IN PAPER EVENT
-
-    paper.on("cell:pointerup", async function (cell) {
-      let jsonObject = graph.toJSON();
-      let jsonString = JSON.stringify(jsonObject);
-
-      const { data } = await axios.post("/user", { data: jsonString });
-    });
-
-  
-  }, []);
+    }
+  }, [paper]);
 
   // TO HANDLE LINK COLOR
   const handleLinkColor = (color) => {
-    console.log(color);
     selectLink.model.attr("line/stroke", color);
   };
 
@@ -353,7 +332,7 @@ function App() {
 
   //TO HANDLE LINK STYLE
   const handelerlinkStyle = (style) => {
-    console.log(selectLink.model.att);
+   
     if (style === "dashes") {
       selectLink.model.attr({
         line: {
@@ -412,21 +391,19 @@ function App() {
     });
   };
 
-
-  //TO DOWNLOAD GRAPH INTO IMAGE FORMAT 
+  //TO DOWNLOAD GRAPH INTO IMAGE FORMAT
 
   const downloadImage = () => {
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+ 
     console.log(paper);
-console.log(">>>paper>>",paper.svg);
+    console.log(">>>paper>>", paper.svg);
 
     var svgDoc = paper.svg;
 
     var serializer = new XMLSerializer();
 
     var data = serializer.serializeToString(svgDoc);
-    console.log(">>>",data);
-   
+
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
 
@@ -442,28 +419,22 @@ console.log(">>>paper>>",paper.svg);
     };
 
     img.src = url;
-    
-    setTimeout(() => {
 
+    setTimeout(() => {
       var canvas = document.getElementById("canvas");
       canvas.style.backgroundColor = "#FFFFFF";
-    
+
       var image = canvas.toDataURL("image/png", 1.0);
-      
+
       var link = document.createElement("a");
       link.download = "my-image.png";
-  
+
       link.href = image;
       link.click();
-     
     }, 2000);
-  
   };
 
-
-  const downloadPdf=()=>{
-    
-  }
+  const downloadPdf = () => {};
 
   return (
     <div className="main-div">
@@ -474,7 +445,7 @@ console.log(">>>paper>>",paper.svg);
           <div id="stencil"></div>
         </Col>
         <Col id="total" className="col2" sm={12} md={8} lg={8} xl={8}>
-          <div  id="paper"></div>
+          <div id="paper"></div>
         </Col>
         <Col className="col3" sm={12} md={12} lg={2} xl={2}>
           <div className="div3"></div>
@@ -484,7 +455,6 @@ console.log(">>>paper>>",paper.svg);
                 className="size-select"
                 onChange={(e) => {
                   SetSelectWidth(e.target.value);
-                  console.log(e.target.value);
                 }}
                 aria-label="Default select example"
               >
@@ -504,7 +474,6 @@ console.log(">>>paper>>",paper.svg);
                 className="size-select"
                 onChange={(e) => {
                   SetSelectHeight(e.target.value);
-                  console.log(e.target.value);
                 }}
                 aria-label="Default select example"
               >
@@ -528,7 +497,7 @@ console.log(">>>paper>>",paper.svg);
               <div className="choose-color">
                 <h2 style={{ color: "white" }}>Color</h2>
                 <img
-                alt=""
+                  alt=""
                   onClick={() => {
                     setShowColors(!showColors);
                   }}
@@ -712,8 +681,10 @@ console.log(">>>paper>>",paper.svg);
           )}
         </Col>
       </Row>
-      <canvas id="canvas"  style={{border:'1px solid red',width:'100%',height:'100%'}} ></canvas>
-
+      <canvas
+        id="canvas"
+        style={{ border: "1px solid red", width: "100%", height: "100%" }}
+      ></canvas>
     </div>
   );
 }

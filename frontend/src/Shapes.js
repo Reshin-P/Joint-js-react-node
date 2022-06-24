@@ -94,6 +94,6 @@ export const atomicShape = new shapes.devs.Atomic({
     height: 90,
   },
 
-  inPorts: [""],
-  outPorts: ["", "", " "],
+  // inPorts: [""],
+  // outPorts: ["", "", " "],
 });
