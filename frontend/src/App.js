@@ -26,10 +26,12 @@ function App() {
   const [showColors, setShowColors] = useState(false);
   const [selectLink, setSelectLink] = useState(null);
 
-  const [pdfDownload, setPdfDownload] = useState(null);
+
+
   const [exportSvg, setExportSvg] = useState(null);
 
   var paper=null
+ 
   //TO HANDLE ELEMENT RESIZING
   const handleElementSize = () => {
     if (!selectWidth) {
@@ -410,8 +412,14 @@ function App() {
     });
   };
 
-  const downloadpdf = () => {
-console.log(">>>>>",paper.svg);
+
+  //TO DOWNLOAD GRAPH INTO IMAGE FORMAT 
+
+  const downloadImage = () => {
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    console.log(paper);
+console.log(">>>paper>>",paper.svg);
+
     var svgDoc = paper.svg;
 
     var serializer = new XMLSerializer();
@@ -434,7 +442,9 @@ console.log(">>>>>",paper.svg);
     };
 
     img.src = url;
+    
     setTimeout(() => {
+
       var canvas = document.getElementById("canvas");
       canvas.style.backgroundColor = "#FFFFFF";
     
@@ -450,15 +460,21 @@ console.log(">>>>>",paper.svg);
   
   };
 
+
+  const downloadPdf=()=>{
+    
+  }
+
   return (
     <div className="main-div">
-      <button onClick={downloadpdf}>downlaod</button>
+      <button onClick={downloadImage}>Image</button>
+      <button onClick={downloadPdf}>Pdf</button>
       <Row className="main-row">
         <Col className="col1" sm={12} md={12} lg={2} xl={2}>
           <div id="stencil"></div>
         </Col>
         <Col id="total" className="col2" sm={12} md={8} lg={8} xl={8}>
-          <div id="paper"></div>
+          <div  id="paper"></div>
         </Col>
         <Col className="col3" sm={12} md={12} lg={2} xl={2}>
           <div className="div3"></div>
@@ -696,7 +712,7 @@ console.log(">>>>>",paper.svg);
           )}
         </Col>
       </Row>
-      <canvas id="canvas"  style={{border:'1px solid red',width:'100%',height:'100%',display:'none'}} ></canvas>
+      <canvas id="canvas"  style={{border:'1px solid red',width:'100%',height:'100%'}} ></canvas>
 
     </div>
   );
