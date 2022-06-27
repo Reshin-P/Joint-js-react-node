@@ -393,14 +393,14 @@ function App() {
 
   const downloadImage = () => {
     console.log(paper);
-    console.log(">>>paper>>", paper.svg);
+    // console.log(">>>paper>>", paper.svg);
 
     var svgDoc = paper.svg;
 
     var serializer = new XMLSerializer();
 
     var data = serializer.serializeToString(svgDoc);
-    console.log(data);
+    // console.log(data);
 
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
@@ -416,6 +416,9 @@ function App() {
       DOMURL.revokeObjectURL(url);
     };
 
+
+
+
     img.src = url;
 
     setTimeout(() => {
@@ -424,6 +427,8 @@ function App() {
 
       var image = canvas.toDataURL("image/png", 1.0);
 
+
+      
       var link = document.createElement("a");
       link.download = "my-image.png";
 
