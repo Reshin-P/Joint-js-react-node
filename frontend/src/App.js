@@ -196,7 +196,6 @@ function App() {
 
     var total = $("#total");
 
-
     // Canvas where sape are dropped
 
     // Canvas from which you take shapes
@@ -332,7 +331,6 @@ function App() {
 
   //TO HANDLE LINK STYLE
   const handelerlinkStyle = (style) => {
-   
     if (style === "dashes") {
       selectLink.model.attr({
         line: {
@@ -394,7 +392,6 @@ function App() {
   //TO DOWNLOAD GRAPH INTO IMAGE FORMAT
 
   const downloadImage = () => {
- 
     console.log(paper);
     console.log(">>>paper>>", paper.svg);
 
@@ -403,6 +400,7 @@ function App() {
     var serializer = new XMLSerializer();
 
     var data = serializer.serializeToString(svgDoc);
+    console.log(data);
 
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
