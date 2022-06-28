@@ -46,7 +46,6 @@ function App() {
     SetSelectHeight(null);
   };
   //------------------------------------------------------------->>
-
   useEffect(() => {
     var total = $("#total");
     setPaper(
@@ -392,32 +391,34 @@ function App() {
   //TO DOWNLOAD GRAPH INTO IMAGE FORMAT
 
   const downloadImage = () => {
+
+
+
     console.log(paper);
-    // console.log(">>>paper>>", paper.svg);
+    console.log(">>>paper>>", paper.svg);
 
     var svgDoc = paper.svg;
 
     var serializer = new XMLSerializer();
 
     var data = serializer.serializeToString(svgDoc);
-    // console.log(data);
+    console.log(data);
 
     var canvas = document.getElementById("canvas");
+    console.log(canvas);
     var ctx = canvas.getContext("2d");
+    console.log(ctx);
 
     var DOMURL = window.URL || window.webkitURL || window;
 
     var img = new Image();
     var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
     var url = DOMURL.createObjectURL(svg);
-
     img.onload = function () {
-      ctx.drawImage(img, 0, 0);
+    ctx.drawImage(img, 0, 0);
+
       DOMURL.revokeObjectURL(url);
     };
-
-
-
 
     img.src = url;
 
@@ -427,8 +428,6 @@ function App() {
 
       var image = canvas.toDataURL("image/png", 1.0);
 
-
-      
       var link = document.createElement("a");
       link.download = "my-image.png";
 
