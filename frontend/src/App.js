@@ -2,7 +2,9 @@ import { dia, elementTools, shapes, util } from "jointjs";
 import $ from "jquery";
 import { useEffect, useState } from "react";
 import axios from "./util/axiosConfig.js";
-import { Col, Form, Row } from "react-bootstrap";
+import { Col, Form, Row,Button } from "react-bootstrap";
+import html2canvas from "html2canvas";
+
 import "./sam.svg";
 import {
   atomicShape,
@@ -224,12 +226,17 @@ function App() {
 
     // TO SELECT ELEMENT FROM THE STENCILPAPER
     if (paper) {
-      paper.on("link:pointerup", (linkView) => {
+      paper.on("link:pointerdown", (linkView) => {
+        linkView.addTools(toolsView);
         setSizeChange(false);
         setShowColorsoption(true);
         setSelectLink(linkView);
       });
 
+      paper.on("element:pointerdown", function (cellView, e, x, y) {
+        console.log("lllll");
+     
+      });
       paper.on("cell:pointerdown", function (cellView, e, x, y) {
         if (!cellView.model.isLink()) {
           cellView.addTools(toolsView);
@@ -246,6 +253,7 @@ function App() {
 
         const { data } = await axios.post("/user", { data: jsonString });
       });
+      
       stencilPaper.on("cell:pointerdown", function (cellView, e, x, y) {
         $("body").append(
           '<div id="flyPaper" style="position:fixed;z-index:100;opacity:.7;pointer-event:none;"></div>'
@@ -282,6 +290,7 @@ function App() {
             target = paper.$el.offset();
 
           // Dropped over paper ?
+          console.log("hloe");
 
           if (
             x > target.left &&
@@ -391,58 +400,67 @@ function App() {
   //TO DOWNLOAD GRAPH INTO IMAGE FORMAT
 
   const downloadImage = () => {
+    console.log("reached functions");
+    html2canvas(document.querySelector("#paper")).then((canvas) => {
+      console.log(canvas);
+      canvas.id = "newcanvas";
+      canvas.style.display = "none";
+      const element = document.getElementById("newcanvas");
+      if (element) {
+        element.remove();
+      }
+      document.body.appendChild(canvas);
+    });
+    
 
 
-
-    console.log(paper);
-    console.log(">>>paper>>", paper.svg);
-
-    var svgDoc = paper.svg;
-
-    var serializer = new XMLSerializer();
-
-    var data = serializer.serializeToString(svgDoc);
-    console.log(data);
-
-    var canvas = document.getElementById("canvas");
-    console.log(canvas);
-    var ctx = canvas.getContext("2d");
-    console.log(ctx);
-
-    var DOMURL = window.URL || window.webkitURL || window;
-
-    var img = new Image();
-    var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
-    var url = DOMURL.createObjectURL(svg);
-    img.onload = function () {
-    ctx.drawImage(img, 0, 0);
-
-      DOMURL.revokeObjectURL(url);
-    };
-
-    img.src = url;
 
     setTimeout(() => {
-      var canvas = document.getElementById("canvas");
+      var canvas = document.getElementById("newcanvas");
       canvas.style.backgroundColor = "#FFFFFF";
-
       var image = canvas.toDataURL("image/png", 1.0);
 
       var link = document.createElement("a");
       link.download = "my-image.png";
-
       link.href = image;
       link.click();
     }, 2000);
+
+    // console.log(paper);
+
+    // var svgDoc = paper.svg;
+    // var serializer = new XMLSerializer();
+    // var data = serializer.serializeToString(svgDoc);
+    // var canvas = document.getElementById("canvas");
+    // var ctx = canvas.getContext("2d");
+    // var DOMURL = window.URL || window.webkitURL || window;
+    // var img = new Image();
+    // var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
+    // var url = DOMURL.createObjectURL(svg);
+
+    // img.onload = function () {
+    //   ctx.drawImage(img, 0, 0);
+    //   DOMURL.revokeObjectURL(url);
+    // };
+    // img.src = url;
+    // setTimeout(() => {
+    //   var canvas = document.getElementById("canvas");
+    //   canvas.style.backgroundColor = "#FFFFFF";
+    //   var image = canvas.toDataURL("image/png", 1.0);
+    //   var link = document.createElement("a");
+    //   link.download = "my-image.png";
+    //   link.href = image;
+    //   link.click();
+    // }, 2000);
   };
 
   const downloadPdf = () => {};
 
   return (
     <div className="main-div">
-      <button onClick={downloadImage}>Image</button>
-      <button onClick={downloadPdf}>Pdf</button>
-      <Row className="main-row">
+      <Button  onClick={downloadImage}>Image</Button>
+      {/* <Button onClick={downloadPdf}>Drag</Button> */}
+      <Row className="main-row ">
         <Col className="col1" sm={12} md={12} lg={2} xl={2}>
           <div id="stencil"></div>
         </Col>
@@ -683,10 +701,10 @@ function App() {
           )}
         </Col>
       </Row>
-      <canvas
+      {/* <canvas
         id="canvas"
         style={{ border: "1px solid red", width: "100%", height: "100%" }}
-      ></canvas>
+      ></canvas> */}
     </div>
   );
 }
