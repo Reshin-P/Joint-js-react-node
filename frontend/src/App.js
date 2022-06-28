@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "./util/axiosConfig.js";
 import { Col, Form, Row,Button } from "react-bootstrap";
 import html2canvas from "html2canvas";
+import  Modal  from "react-modal";
 
 import "./sam.svg";
 import {
@@ -28,10 +29,40 @@ function App() {
   const [showColors, setShowColors] = useState(false);
   const [selectLink, setSelectLink] = useState(null);
 
+  //STATES FOR PAPER
   const [paper, setPaper] = useState();
   const [graph, setGraph] = useState(
     new dia.Graph({}, { cellNamespace: shapes })
   );
+
+  //STATES FOR OPEN AND CLOSE MODAL
+
+  const customStyles = {
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+    },
+  };
+  let subtitle;
+  const [modalIsOpen, setIsOpen] = useState(false);
+
+  function openModal() {
+    setIsOpen(true);
+  }
+
+  function afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    subtitle.style.color = '#f00';
+  }
+
+  function closeModal() {
+    setIsOpen(false);
+  }
+
 
   const [exportSvg, setExportSvg] = useState(null);
 
@@ -233,10 +264,7 @@ function App() {
         setSelectLink(linkView);
       });
 
-      paper.on("element:pointerdown", function (cellView, e, x, y) {
-        console.log("lllll");
-     
-      });
+   
       paper.on("cell:pointerdown", function (cellView, e, x, y) {
         if (!cellView.model.isLink()) {
           cellView.addTools(toolsView);
@@ -397,75 +425,53 @@ function App() {
     });
   };
 
-  //TO DOWNLOAD GRAPH INTO IMAGE FORMAT
-
+  
+//TO CONVERT DIV ELEMENT TO CANVAS
   const downloadImage = () => {
+    setIsOpen(true)
     console.log("reached functions");
     html2canvas(document.querySelector("#paper")).then((canvas) => {
       console.log(canvas);
       canvas.id = "newcanvas";
-      canvas.style.display = "none";
+      canvas.style.width='500px'
+      canvas.style.height='70%'
+      // canvas.style.display = "none";
       const element = document.getElementById("newcanvas");
       if (element) {
         element.remove();
       }
-      document.body.appendChild(canvas);
+      const menu = document.querySelector('#menu');
+      menu.appendChild(canvas);
     });
-    
-
-
-
-    setTimeout(() => {
-      var canvas = document.getElementById("newcanvas");
-      canvas.style.backgroundColor = "#FFFFFF";
-      var image = canvas.toDataURL("image/png", 1.0);
-
-      var link = document.createElement("a");
-      link.download = "my-image.png";
-      link.href = image;
-      link.click();
-    }, 2000);
-
-    // console.log(paper);
-
-    // var svgDoc = paper.svg;
-    // var serializer = new XMLSerializer();
-    // var data = serializer.serializeToString(svgDoc);
-    // var canvas = document.getElementById("canvas");
-    // var ctx = canvas.getContext("2d");
-    // var DOMURL = window.URL || window.webkitURL || window;
-    // var img = new Image();
-    // var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
-    // var url = DOMURL.createObjectURL(svg);
-
-    // img.onload = function () {
-    //   ctx.drawImage(img, 0, 0);
-    //   DOMURL.revokeObjectURL(url);
-    // };
-    // img.src = url;
-    // setTimeout(() => {
-    //   var canvas = document.getElementById("canvas");
-    //   canvas.style.backgroundColor = "#FFFFFF";
-    //   var image = canvas.toDataURL("image/png", 1.0);
-    //   var link = document.createElement("a");
-    //   link.download = "my-image.png";
-    //   link.href = image;
-    //   link.click();
-    // }, 2000);
   };
+
+  //TO DOWNLOAD GRAPH INTO IMAGE FORMAT
+  const downloadimage2=()=>{
+    var canvas = document.getElementById("newcanvas");
+    canvas.style.backgroundColor = "#FFFFFF";
+    var image = canvas.toDataURL("image/png", 1.0);
+
+    var link = document.createElement("a");
+    link.download = "my-image.png";
+    link.href = image;
+    link.click();
+  }
 
   const downloadPdf = () => {};
 
   return (
     <div className="main-div">
-      <Button  onClick={downloadImage}>Image</Button>
-      {/* <Button onClick={downloadPdf}>Drag</Button> */}
       <Row className="main-row ">
         <Col className="col1" sm={12} md={12} lg={2} xl={2}>
           <div id="stencil"></div>
         </Col>
         <Col id="total" className="col2" sm={12} md={8} lg={8} xl={8}>
-          <div id="paper"></div>
+          <div className="tools">
+          <button style={{width:'50px',height:'50px',border:'none'}} onClick={downloadImage}><img width={'100%'} height={'100%'} src="/images/download2.png"></img></button>
+          </div>
+         <div className="col2-div">
+         <div id="paper"></div>
+         </div>
         </Col>
         <Col className="col3" sm={12} md={12} lg={2} xl={2}>
           <div className="div3"></div>
@@ -517,7 +523,7 @@ function App() {
               <div className="choose-color">
                 <h2 style={{ color: "white" }}>Color</h2>
                 <img
-                  alt=""
+                  alt="color"
                   onClick={() => {
                     setShowColors(!showColors);
                   }}
@@ -614,7 +620,7 @@ function App() {
                       handelerconnectionStyle("normal");
                     }}
                   >
-                    <img src="/images/angle.png"></img>
+                    <img alt="angle" src="/images/angle.png"></img>
                   </div>
                   <div
                     className="connect"
@@ -622,7 +628,7 @@ function App() {
                       handelerconnectionStyle("rounded");
                     }}
                   >
-                    <img src="/images/half.png"></img>
+                    <img alt="round" src="/images/half.png"></img>
                   </div>
                   <div
                     className="connect"
@@ -630,7 +636,7 @@ function App() {
                       handelerconnectionStyle("curve");
                     }}
                   >
-                    <img src="/images/round.png"></img>
+                    <img alt="round2" src="/images/round.png"></img>
                   </div>
                 </div>
               </div>
@@ -664,7 +670,7 @@ function App() {
                       handleLinkSize(2);
                     }}
                   >
-                    <img width={"100%"} src="/images/1.png"></img>
+                    <img alt="2" width={"100%"} src="/images/1.png"></img>
                   </div>
                   <div
                     className="thick"
@@ -672,7 +678,7 @@ function App() {
                       handleLinkSize(4);
                     }}
                   >
-                    <img width={"100%"} src="/images/2.png"></img>
+                    <img alt="4" width={"100%"} src="/images/2.png"></img>
                   </div>
                   <div
                     className="thick"
@@ -680,7 +686,7 @@ function App() {
                       handleLinkSize(6);
                     }}
                   >
-                    <img width={"100%"} src="/images/3.png"></img>
+                    <img alt="6" width={"100%"} src="/images/3.png"></img>
                   </div>
                   <div
                     className="thick"
@@ -688,7 +694,7 @@ function App() {
                       handleLinkSize(8);
                     }}
                   >
-                    <img width={"100%"} src="/images/4.png"></img>
+                    <img alt="8" width={"100%"} src="/images/4.png"></img>
                   </div>
                 </div>
               </div>
@@ -696,15 +702,27 @@ function App() {
           )}
           {exportSvg && (
             <div>
-              <img width={"100%"} src={exportSvg}></img>
+              <img  alt="e"  width={"100%"} src={exportSvg}></img>
             </div>
           )}
         </Col>
       </Row>
-      {/* <canvas
-        id="canvas"
-        style={{ border: "1px solid red", width: "100%", height: "100%" }}
-      ></canvas> */}
+      <Modal 
+      
+        isOpen={modalIsOpen}
+        onAfterOpen={afterOpenModal}
+        onRequestClose={closeModal}
+        style={customStyles}
+        contentLabel="Example Modal"
+      >
+      <div >
+      <div style={{width:'70%',height:'50%'}} id="menu">
+
+        </div>
+        <Button className="btn-danger" style={{marginLeft:'200px'}} onClick={downloadimage2}> Download</Button>
+      </div>
+     
+      </Modal>
     </div>
   );
 }
