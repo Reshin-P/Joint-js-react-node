@@ -1,1 +1,0 @@
-import { dia,shapes } from "jointjs";

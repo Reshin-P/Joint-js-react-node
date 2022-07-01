@@ -122,5 +122,10 @@ justify-content: space-between;
 .tools{
   height: 50px;
  background-color: #f8f8f8;
+
+
    
+}
+.d-btn{
+  border-radius: 50% ;
 }
