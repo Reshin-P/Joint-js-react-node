@@ -46,6 +46,9 @@ function App() {
   //STATES FOR OPEN AND CLOSE MODAL
   const [modalIsOpen, setIsOpen] = useState(false);
 
+  //STATES FOR CHANGIN LINE LABEL
+  const [textValue, setTextValue] = useState("");
+
   //-------------------------<MODAL>---------------------------->>
   // CUSTOM STYLE FOR MODAL
   const customStyles = {
@@ -76,7 +79,6 @@ function App() {
 
   //-------------------------</MODAL>---------------------------->>
 
-  //------------------------------------------------------------->>
 
   //TO HANDLE ELEMENT RESIZING
   const handleElementSize = () => {
@@ -92,7 +94,28 @@ function App() {
   };
   //------------------------------------------------------------->>
 
+
   useEffect(() => {
+    const paperContainer = document.getElementById("paper");
+
+    new dia.Paper({
+      model: graph,
+      cellViewNamespace: shapes,
+      width: "100%",
+      height: "100%",
+      gridSize: 20,
+      drawGrid: { name: "mesh" },
+      async: true,
+      sorting: dia.Paper.sorting.APPROX,
+      background: { color: "#F3F7F6" },
+      defaultLink: () => new shapes.standard.Link(),
+      connectionStrategy: function (end, view, _magnet, coords) {
+        end.anchor = {
+          name: view.model.getBBox().sideNearestToPoint(coords)
+        };
+      }
+    });
+
     var total = $("#total");
     setPaper(
       new dia.Paper({
@@ -100,11 +123,25 @@ function App() {
         width: total.outerWidth(),
         height: total.outerHeight(),
         model: graph,
-        defaultLink: () => new shapes.standard.Link(),
         linkPinning: false,
         cellViewNamespace: shapes,
+        async: true,
+     
+        sorting: dia.Paper.sorting.APPROX,
+      
+        defaultLink: () => new shapes.standard.Link(),
+        connectionStrategy: function (end, view, _magnet, coords) {
+          end.anchor = {
+            name: view.model.getBBox().sideNearestToPoint(coords)
+          };
+        }
+      
       })
     );
+    const rectangle = new shapes.standard.Rectangle();
+    rectangle.resize(100, 100);
+    rectangle.position(100, 100);
+    rectangle.addTo(graph);
   }, []);
 
   useEffect(() => {
@@ -364,9 +401,8 @@ function App() {
 
     faderAuxShape.addPort(fadeAutoPort1);
     faderAuxShape.addPort(fadeAutoPort2);
-    console.log(">port>", faderShape);
 
-    var total = $("#total");
+ 
 
     // Canvas where sape are dropped
 
@@ -378,46 +414,8 @@ function App() {
         interactive: false,
         height: "920px",
       });
+ 
 
-    var shadowLink = new shapes.standard.Link();
-    shadowLink.prop("source", { x: 200, y: 600 });
-    shadowLink.prop("target", { x: 200, y: 750 });
-    shadowLink.attr("line", { targetMarker: { type: "none" } });
-    shadowLink.label(0, {
-      markup: [
-          {
-              tagName: 'rect',
-              selector: 'body'
-          }, {
-              tagName: 'text',
-              selector: 'label'
-          }
-      ],
-      attrs: {
-          body: {
-              fill: 'white' // white background
-          },
-          label: {
-              text: 'my label', // text to show
-              fill: 'black  ' // blue text
-          }
-      },
-      position: {
-          distance: 0, // midway on the connection path
-          offset: {
-              x: 0, // 10 local x units to the right
-              y: 140 // 5 local y units above
-          },
-         
-          args: {
-          
-              keepGradient: true, // auto-rotate by path slope at distance
-              ensureLegibility: true // auto-rotate label if upside-down
-          }
-      }
-  });
-    shadowLink.attr("line/stroke", "#5654a0");
-   
 
     stencilGraph.addCells([
       rectangleShape,
@@ -432,17 +430,108 @@ function App() {
       link5,
       faderShape,
       faderAuxShape,
-      shadowLink
     ]);
 
     var boundaryTool = new elementTools.Boundary();
     var removeButton = new elementTools.Remove();
-    var toolsView = new dia.ToolsView({
-      tools: [boundaryTool, removeButton],
-    });
+   
+    
+  //   var infoButton = new elementTools.Button({
+  //     focusOpacity: 0.5,
+  //     distance: 60,
+  //     x: '100%',
+  //   y: '0%',
+  //   offset: { x: -5, y: -5 },
+  //   magnet: 'body',
+  //     action: function(evt) {
+  //       console.log("jii",this);
+  //       let links=new shapes.standard.Link()
+  //       link5.prop("source", { x: 1000, y: 100 });
+  //       link5.prop("target", { x: 500, y: 650 });
+  //       console.log(links);
+      
+  //       graph.addCell(links)
+  //     },
+  //     markup: [{
+  //         tagName: 'circle',
+  //         selector: 'button',
+  //         attributes: {
+  //             'r': 7,
+  //             'fill': '#001DFF',
+  //             'cursor': 'pointer'
+  //         }
+  //     }, {
+  //         tagName: 'path',
+  //         selector: 'icon',
+  //         attributes: {
+  //             'd': 'M -2 4 2 4 M 0 3 0 0 M -2 -1 1 -1 M -1 -4 1 -4',
+  //             'fill': 'none',
+  //             'stroke': '#FFFFFF',
+  //             'stroke-width': 2,
+  //             'pointer-events': 'none'
+  //         }
+  //     }]
+  // });
+    
+  function getMarkup(angle = 0) {
+    return [
+      {
+        tagName: "circle",
+        selector: "button",
+        attributes: {
+          r: 7,
+          fill: "#4666E5",
+          stroke: "#FFFFFF",
+          cursor: "pointer"
+        }
+      },
+      {
+        tagName: "path",
+        selector: "icon",
+        attributes: {
+          transform: `rotate(${angle})`,
+          d: "M -4 -1 L 0 -1 L 0 -4 L 4 0 L 0 4 0 1 -4 1 z",
+          fill: "#FFFFFF",
+          stroke: "none",
+          "stroke-width": 2,
+          "pointer-events": "none"
+        }
+      }
+    ];
+  }
+  
+  const connectRight = new elementTools.Connect({
+    x: "100%",
+    y: "50%",
+    markup: getMarkup(0)
+  });
+  
+  const connectBottom = new elementTools.Connect({
+    x: "50%",
+    y: "100%",
+    markup: getMarkup(90)
+  });
+  const connectTop = new elementTools.Connect({
+    x: "50%",
+    y: "0%",
+    markup: getMarkup(270)
+  });
+  const connectLeft = new elementTools.Connect({
+    x: "0%",
+    y: "50%",
+    markup: getMarkup(180)
+  });
 
+    var toolsView = new dia.ToolsView({
+      tools: [boundaryTool,removeButton,connectLeft,connectRight,connectBottom,connectTop]
+    });
+   
+   
     // TO SELECT ELEMENT FROM THE STENCILPAPER
     if (paper) {
+
+
+    
       var line = V("line", {
         x1: 1050,
         y1: 100,
@@ -477,39 +566,49 @@ function App() {
       V(paper.viewport).append(line4);
       V(paper.viewport).append(line2);
       paper.on("link:pointerdown", (linkView) => {
-        console.log("linkvie");
+        console.log("kkkkkk");
         linkView.addTools(toolsView);
         setSizeChange(false);
         setShowColorsoption(true);
         setSelectLink(linkView);
       });
-      // graph.addCell(
-      //   new dia.Link({
-      //     source: { x: 500, y: 100 },
-      //     target: { x: 500, y: 500 },
-      //   })
-      // );
 
+      // TO REMOVE TOOLS FROM ELEMENT AND LINK WHERE MOUSE LEAVE FROM ELEMENT OR LINK
+      // paper.on("cell:mouseleave", function (linkView) {
+      //   linkView.removeTools();
+      // });
+      // paper.on("link:mouseleave", function (linkView) {
+      //   linkView.removeTools();
+      // });
+
+      //-------------------------------------------------------------------------------->
+     
+      //EVENT FOR ELEMENT MOUSE PONTER DOWN
       paper.on("cell:pointerdown", function (cellView, e, x, y) {
         if (!cellView.model.isLink()) {
           cellView.addTools(toolsView);
           setSizeChange(true);
-          setElement(cellView);
+
           setShowColorsoption(false);
           setShowColors(false);
         }
+        setElement(cellView);
       });
 
-      paper.on("cell:pointerup", async function (cell) {
-        let jsonObject = graph.toJSON();
-        let jsonString = JSON.stringify(jsonObject);
+      //-------------------------------------------------------------------------------->
 
-        const { data } = await axios.post("/user", { data: jsonString });
-      });
+      // paper.on("cell:pointerup", async function (cell) {
+      //   let jsonObject = graph.toJSON();
+      //   let jsonString = JSON.stringify(jsonObject);
 
+      //   const { data } = await axios.post("/user", { data: jsonString });
+      // });
+
+      // EVENT FOR COPY ELEMENT FROM THE STENCILPAPER AND PASTE TO THE PAPER
+    
+      
+    
       stencilPaper.on("cell:pointerdown", function (cellView, e, x, y) {
-        console.log("cellView", cellView);
-
         $("body").append(
           '<div id="flyPaper" style="position:fixed;z-index:100;opacity:.7;pointer-event:none;"></div>'
         );
@@ -525,11 +624,9 @@ function App() {
             x: x - pos.x,
             y: y - pos.y,
           };
-          console.log("flyShape22", flyShape);
 
-          flyShape.position(0, 0);
-          flyGraph.addCell(flyShape);
-          // console.log("www", flyGraph);
+        flyShape.position(0, 0);
+        flyGraph.addCell(flyShape);
         $("#flyPaper").offset({
           left: e.pageX - offset.x,
           top: e.pageY - offset.y,
@@ -554,7 +651,6 @@ function App() {
             y > target.top &&
             y < target.top + paper.$el.height()
           ) {
-            // console.log("hloe");
 
             var s = flyShape.clone();
             s.position(x - target.left - offset.x, y - target.top - offset.y);
@@ -576,7 +672,6 @@ function App() {
             //     attrs: { label: { text: "out" } },
             //   },
             // ]);
-            console.log(";;;;",s  );
             graph.addCell(s);
           }
           $("body").off("mousemove.fly").off("mouseup.fly");
@@ -584,6 +679,9 @@ function App() {
           $("#flyPaper").remove();
         });
       });
+      //-------------------------------------------------------------------------------->
+
+
     }
   }, [paper]);
 
@@ -659,9 +757,7 @@ function App() {
   //TO CONVERT DIV ELEMENT TO CANVAS
   const downloadImage = () => {
     setIsOpen(true);
-    console.log("reached functions");
     html2canvas(document.querySelector("#paper")).then((canvas) => {
-      console.log(canvas);
       canvas.id = "newcanvas";
       canvas.style.width = "500px";
       canvas.style.height = "70%";
@@ -687,8 +783,83 @@ function App() {
     link.click();
   };
 
-  const downloadPdf = () => {};
+  const handleAddLine = () => {
+    var shadowLink = new shapes.standard.Link();
+    shadowLink.prop("source", { x: 700, y: 70 });
+    shadowLink.prop("target", { x: 700, y: 750 });
+    shadowLink.attr("line", { targetMarker: { type: "none" } });
+    shadowLink.label(0, {
+      markup: [
+        {
+          tagName: "rect",
+          selector: "body",
+        },
+        {
+          tagName: "text",
+          selector: "label",
+        },
+      ],
+      attrs: {
+        body: {
+          fill: "white", // white background
+        },
+        label: {
+          text: "my label", // text to show
+          fill: "black  ", // blue text
+        },
+      },
+      position: {
+        distance: 0, // midway on the connection path
+        offset: {
+          x: 0, // 10 local x units to the right
+          y: 650, // 5 local y units above
+        },
 
+        args: {
+          keepGradient: true, // auto-rotate by path slope at distance
+          ensureLegibility: true, // auto-rotate label if upside-down
+        },
+      },
+    });
+    shadowLink.attr("line/stroke", "#5654a0");
+    shadowLink.addTo(graph);
+  };
+
+  const handleLinkLabel = () => {
+    selectLink.model.label(0, {
+      markup: [
+        {
+          tagName: "rect",
+          selector: "body",
+        },
+        {
+          tagName: "text",
+          selector: "label",
+        },
+      ],
+      attrs: {
+        body: {
+          fill: "white", // white background
+        },
+        label: {
+          text: textValue, // text to show
+          fill: "black  ", // blue text
+        },
+      },
+      position: {
+        distance: 0, // midway on the connection path
+        offset: {
+          x: 0, // 10 local x units to the right
+          y: 650, // 5 local y units above
+        },
+
+        args: {
+          keepGradient: true, // auto-rotate by path slope at distance
+          ensureLegibility: true, // auto-rotate label if upside-down
+        },
+      },
+    });
+  };
   return (
     <div className="main-div">
       <Row className="main-row ">
@@ -707,6 +878,9 @@ function App() {
                 src="/images/download2.png"
               ></img>
             </button>
+            <Button onClick={handleAddLine} variant="outline-info">
+              Insert Line
+            </Button>
           </div>
           <div className="col2-div">
             <div id="paper"></div>
@@ -899,45 +1073,57 @@ function App() {
           )}
 
           {showColorsOption && (
-            <div>
-              <p style={{ color: "white" }}>Link thickness</p>
-              <div className="thick-main">
-                <div className="thick-inner">
-                  <div
-                    className="thick"
-                    onClick={() => {
-                      handleLinkSize(2);
-                    }}
-                  >
-                    <img alt="2" width={"100%"} src="/images/1.png"></img>
-                  </div>
-                  <div
-                    className="thick"
-                    onClick={() => {
-                      handleLinkSize(4);
-                    }}
-                  >
-                    <img alt="4" width={"100%"} src="/images/2.png"></img>
-                  </div>
-                  <div
-                    className="thick"
-                    onClick={() => {
-                      handleLinkSize(6);
-                    }}
-                  >
-                    <img alt="6" width={"100%"} src="/images/3.png"></img>
-                  </div>
-                  <div
-                    className="thick"
-                    onClick={() => {
-                      handleLinkSize(8);
-                    }}
-                  >
-                    <img alt="8" width={"100%"} src="/images/4.png"></img>
+            <>
+              <div>
+                <p style={{ color: "white" }}>Link thickness</p>
+                <div className="thick-main">
+                  <div className="thick-inner">
+                    <div
+                      className="thick"
+                      onClick={() => {
+                        handleLinkSize(2);
+                      }}
+                    >
+                      <img alt="2" width={"100%"} src="/images/1.png"></img>
+                    </div>
+                    <div
+                      className="thick"
+                      onClick={() => {
+                        handleLinkSize(4);
+                      }}
+                    >
+                      <img alt="4" width={"100%"} src="/images/2.png"></img>
+                    </div>
+                    <div
+                      className="thick"
+                      onClick={() => {
+                        handleLinkSize(6);
+                      }}
+                    >
+                      <img alt="6" width={"100%"} src="/images/3.png"></img>
+                    </div>
+                    <div
+                      className="thick"
+                      onClick={() => {
+                        handleLinkSize(8);
+                      }}
+                    >
+                      <img alt="8" width={"100%"} src="/images/4.png"></img>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+              <div className="mt-5">
+                <p style={{ color: "white" }}>Text</p>
+                <input
+                  type={"text"}
+                  onBlur={handleLinkLabel}
+                  onChange={(e) => {
+                    setTextValue(e.target.value);
+                  }}
+                />
+              </div>
+            </>
           )}
         </Col>
       </Row>
@@ -956,7 +1142,6 @@ function App() {
               style={{ marginLeft: "200px" }}
               onClick={downloadimage2}
             >
-              {" "}
               Download
             </Button>
           </div>
