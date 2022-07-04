@@ -94,14 +94,6 @@ function App() {
   //------------------------------------------------------------->>
 
   useEffect(() => {
-    //     const getdata = async () => {
-    //           let { data } = await axios.get('/user')
-    //           if (data) {
-    //             data=JSON.parse(data)
-    //             graph.fromJSON(data)
-    //           }
-    //         }
-    // getdata()
     var total = $("#total");
 
     setPaper(
@@ -112,8 +104,10 @@ function App() {
         width: "100%",
         height: "1000px",
         model: graph,
-
+        
         cellViewNamespace: shapes,
+        async: true,
+        sorting: dia.Paper.sorting.APPROX,
         defaultLink: () =>
           new dia.Link({
             attrs: { ".marker-target": { d: "M 10 0 L 0 5 L 10 10 z" } },
@@ -394,7 +388,7 @@ function App() {
         model: stencilGraph,
         interactive: false,
         height: "920px",
-        width: "300px",
+        width:'300px'
       });
 
     stencilGraph.addCells([
@@ -420,9 +414,12 @@ function App() {
       offset: { x: -5, y: -5 },
       magnet: "body",
       action: function (evt) {
+        console.log("jii", this);
         let links = new shapes.standard.Link();
         link5.prop("source", { x: 1000, y: 100 });
         link5.prop("target", { x: 500, y: 650 });
+        console.log(links);
+
         graph.addCell(links);
       },
       markup: [
@@ -582,20 +579,19 @@ function App() {
 
       //-------------------------------------------------------------------------------->
 
-      paper.on("cell:pointerup", async function (cell) {
-        let jsonObject = graph.toJSON();
-        let jsonString = JSON.stringify(jsonObject);
+      // paper.on("cell:pointerup", async function (cell) {
+      //   let jsonObject = graph.toJSON();
+      //   let jsonString = JSON.stringify(jsonObject);
 
-        const { data } = await axios.post("/user", { data: jsonString });
-      });
+      //   const { data } = await axios.post("/user", { data: jsonString });
+      // });
 
       // EVENT FOR COPY ELEMENT FROM THE STENCILPAPER AND PASTE TO THE PAPER
 
       stencilPaper.on("cell:pointerdown", function (cellView, e, x, y) {
-        console.log(x,y);
         $("body").append(
-          '<div id="flyPaper" style="position:fixed;z-index:100;opacity:.7;pointer-event:none;  background-color: #0ae928;   width: auto;   height: auto;"></div>'
-          );
+          '<div id="flyPaper" style="position:fixed;z-index:100;opacity:.7;pointer-event:none;"></div>'
+        );
         var flyGraph = new dia.Graph({}, { cellNamespace: shapes }),
           flyPaper = new dia.Paper({
             el: $("#flyPaper"),
@@ -668,11 +664,12 @@ function App() {
 
   // TO HANDLE LINK COLOR
   const handleLinkColor = (color) => {
-    console.log(color,selectLink);
+    console.log(color, selectLink);
     selectLink.model.attr("line/stroke", color);
   };
 
   const handelerconnectionStyle = (style) => {
+    console.log(style, selectLink);
     selectLink.model.connector(style);
   };
 
@@ -1082,7 +1079,7 @@ function App() {
                         handleLinkSize(6);
                       }}
                     >
-                      <img alt="6" width={"100%"}  src="/images/3.png"></img>
+                      <img alt="6" width={"100%"} src="/images/3.png"></img>
                     </div>
                     <div
                       className="thick"
@@ -1099,7 +1096,7 @@ function App() {
                 <p style={{ color: "white" }}>Text</p>
                 <input
                   type={"text"}
-                  onBlur={handleLinkLabel}
+                  // onBlur={handleLinkLabel}
                   onChange={(e) => {
                     setTextValue(e.target.value);
                   }}
