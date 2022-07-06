@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.27.2",
     "base-64": "^1.0.0",
+    "canvg": "^4.0.0",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
     "jointjs": "^3.5.5",

@@ -6,6 +6,7 @@ import { Button, Col, Form, Row } from "react-bootstrap";
 import Modal from "react-modal";
 import jsPDF from "jspdf";
 import saveAs from "file-saver";
+import { Canvg } from "canvg";
 import "./App.css";
 import axios from "./util/axiosConfig.js";
 import {
@@ -790,7 +791,7 @@ function App() {
   };
 
   //TO DOWNLOAD GRAPH INTO IMAGE FORMAT
-  const downloadimage2 = (type) => {
+  const downloadimage2 = async (type) => {
     var canvas = document.getElementById("newcanvas");
     var imgData = canvas.toDataURL("image/jpeg", 1.0);
     if (type === "jpeg") {
@@ -812,43 +813,47 @@ function App() {
       pdf.addImage(imgData, "JPEG", 0, 0);
       pdf.save("download.pdf");
     } else if (type === "svg") {
-      
-      //       var svgDoc = paper.svg;
-      //       var serializer = new XMLSerializer();
-      //       var svgString = serializer.serializeToString(svgDoc)
-      //       console.log("<<<",svgString);
-      // var dataURL = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-350%20-250%20700%20500%22%3E%0A%20%20%20%20%20%20%3Cstyle%20type%3D%22text%2Fcss%22%20media%3D%22screen%22%3E%0A%20%20%20%20%20%20%20%20svg%20%7B%20background%3A%23fff%3B%20%7D%0A%20%20%20%20%20%20%20%20.face%20%7B%20stroke%3A%23000%3B%20stroke-width%3A20px%3B%20stroke-linecap%3Around%20%7D%0A%20%20%20%20%20%20%3C%2Fstyle%3E%0A%20%20%20%20%20%20%3Ccircle%20r%3D%22200%22%20class%3D%22face%22%20fill%3D%22red%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20fill%3D%22none%22%20class%3D%22face%22%20transform%3D%22translate(-396%2C-230)%22%20d%3D%22M487%2C282c-15%2C36-51%2C62-92%2C62%20c-41%2C0-77-25-92-61%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22-60%22%20cy%3D%22-50%22%20r%3D%2220%22%20fill%3D%22%23000%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2260%22%20cy%3D%22-50%22%20r%3D%2220%22%20fill%3D%22%23000%22%2F%3E%0A%20%20%20%20%3C%2Fsvg%3E";
+      var svgDoc = paper.svg;
+      var serializer = new XMLSerializer();
+      var source = serializer.serializeToString(svgDoc);
 
-      //       var dataURL = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-350%20-250%20700%20500%22%3E%0A%20%20%20%20%20%20%3Cstyle%20type%3D%22text%2Fcss%22%20media%3D%22screen%22%3E%0A%20%20%20%20%20%20%20%20svg%20%7B%20background%3A%23fff%3B%20%7D%0A%20%20%20%20%20%20%20%20.face%20%7B%20stroke%3A%23000%3B%20stroke-width%3A20px%3B%20stroke-linecap%3Around%20%7D%0A%20%20%20%20%20%20%3C%2Fstyle%3E%0A%20%20%20%20%20%20%3Ccircle%20r%3D%22200%22%20class%3D%22face%22%20fill%3D%22red%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20fill%3D%22none%22%20class%3D%22face%22%20transform%3D%22translate(-396%2C-230)%22%20d%3D%22M487%2C282c-15%2C36-51%2C62-92%2C62%20c-41%2C0-77-25-92-61%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22-60%22%20cy%3D%22-50%22%20r%3D%2220%22%20fill%3D%22%23000%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2260%22%20cy%3D%22-50%22%20r%3D%2220%22%20fill%3D%22%23000%22%2F%3E%0A%20%20%20%20%3C%2Fsvg%3E";
-      // var dl = document.createElement("a");
-      // document.body.appendChild(dl); // This line makes it work in Firefox.
-      // dl.setAttribute("href",svgString );
-      // dl.setAttribute("download", "test.svg");
-      // dl.click();
-      // var encodedData;
-      // var s = new XMLSerializer().serializeToString(
-      //   document.getElementById("paper")
-      // );
-      // encodedData = window.btoa(s);
-      // console.log("encodedData", encodedData);
-      // var canvas = document.getElementById("newcanvas");
-      // var ctx = canvas.getContext("2d");
-  
-      // setTimeout(() => {
-      //   var image = canvas.toDataURL("image/svg", 1.0);
+      //add name spaces.
+      if (
+        !source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)
+      ) {
+        console.log("not matached1");
+        source = source.replace(
+          /^<svg/,
+          '<svg xmlns="http://www.w3.org/2000/svg"'
+        );
+      }
+      if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
+        console.log("not matached2");
 
-      //   var link = document.createElement("a");
-      //   link.download = "my-image.svg";
+        source = source.replace(
+          /^<svg/,
+          '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
+        );
+      }
+      //add xml declaration
+      source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
 
-      //   link.href = image;
-      //   link.click();
-      // }, 2000);
+      //convert svg source to URI data scheme.
+      var url =
+        "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+      console.log(" matached2");
+
+      //set url value to a element's href attribute.
+      var link = document.createElement("a");
+      link.download = "my-image.svg";
+
+      link.href = url;
+      link.click();
     }
-    // canvas.toBlob(function (blob) {
-    //   saveAs(blob, "MyCanvas.svg");
-    // });
   };
 
+
+  // TO ADD VERTICAL LINE
   const handleAddLine = () => {
     var shadowLink = new shapes.standard.Link();
     shadowLink.prop("source", { x: 700, y: 70 });
