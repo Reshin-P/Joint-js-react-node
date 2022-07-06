@@ -125,16 +125,11 @@ justify-content: space-between;
 }
 .tools{
   height: 50px;
- background-color: #f8f8f8;
-
-
-   
+ background-color: #f8f8f8;  
 }
 .d-btn{
   border-radius: 50% ;
 }
-
-
 .available-magnet {
   fill: green;
 }
@@ -142,4 +137,10 @@ justify-content: space-between;
 /* element styling */
 .available-cell rect {
   stroke-dasharray: 5, 2;
+}
+.btndown{
+  display: flex;
+  justify-content: space-evenly;  
+  padding-bottom: 10px;
+
 }

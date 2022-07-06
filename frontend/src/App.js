@@ -4,6 +4,8 @@ import $ from "jquery";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Row } from "react-bootstrap";
 import Modal from "react-modal";
+import jsPDF from "jspdf";
+import saveAs from "file-saver";
 import "./App.css";
 import axios from "./util/axiosConfig.js";
 import {
@@ -26,6 +28,7 @@ import {
 } from "./Shapes.js";
 
 function App() {
+  var c = 0;
   // STATES FOR RESIZING ELEMENT
   const [sizeChange, setSizeChange] = useState(false);
   const [element, setElement] = useState(null);
@@ -49,7 +52,16 @@ function App() {
   //STATES FOR CHANGIN LINE LABEL
   const [textValue, setTextValue] = useState("");
 
+  //STATES FOR UNDO
+  const [undoData, setUndoData] = useState([]);
+  const [undoCount, setUndoCount] = useState(0);
+
+  //STATES FOR REDO
+  const [redoData, setRedoData] = useState([]);
+  const [redoCount, setRedoCount] = useState(0);
+
   //-------------------------<MODAL>---------------------------->>
+
   // CUSTOM STYLE FOR MODAL
   const customStyles = {
     content: {
@@ -62,6 +74,7 @@ function App() {
       border: "none",
     },
   };
+
   let subtitle;
 
   function openModal() {
@@ -94,6 +107,18 @@ function App() {
   //------------------------------------------------------------->>
 
   useEffect(() => {
+    let jsonObject = graph.toJSON();
+    let jsonString = JSON.stringify(jsonObject);
+    setRedoData((state) => [jsonString, ...state]);
+    // TO SEND GRAPH DATA TO BACKEND WHEN INTERNETS COME BACK
+    window.ononline = async (event) => {
+      let jsonString = localStorage.getItem("tempGraphData");
+      try {
+        const { data } = await axios.post("/user", { data: jsonString });
+        localStorage.removeItem("tempGraphData");
+      } catch (error) {}
+    };
+
     //     const getdata = async () => {
     //           let { data } = await axios.get('/user')
     //           if (data) {
@@ -486,6 +511,7 @@ function App() {
       // V(paper.viewport).append(line2);
       var boundaryTool = new elementTools.Boundary();
       var removeButton = new elementTools.Remove();
+      var connecetTool = new elementTools.Connect();
 
       function getMarkup(angle = 0) {
         return [
@@ -547,11 +573,10 @@ function App() {
         ],
       });
       var toolsView2 = new dia.ToolsView({
-        tools: [removeButton],
+        tools: [connectTop],
       });
 
       paper.on("link:pointerdown", (linkView) => {
-        console.log("kkkkkk");
         linkView.addTools(toolsView2);
         setSizeChange(false);
         setShowColorsoption(true);
@@ -573,7 +598,6 @@ function App() {
         if (!cellView.model.isLink()) {
           cellView.addTools(toolsView);
           setSizeChange(true);
-
           setShowColorsoption(false);
           setShowColors(false);
         }
@@ -585,21 +609,30 @@ function App() {
       paper.on("cell:pointerup", async function (cell) {
         let jsonObject = graph.toJSON();
         let jsonString = JSON.stringify(jsonObject);
+        setUndoData((state) => [jsonString, ...state]);
 
-        const { data } = await axios.post("/user", { data: jsonString });
+        if (navigator.onLine) {
+          const { data } = await axios.post("/user", { data: jsonString });
+        } else {
+          localStorage.setItem("tempGraphData", jsonString);
+        }
       });
 
       // EVENT FOR COPY ELEMENT FROM THE STENCILPAPER AND PASTE TO THE PAPER
 
       stencilPaper.on("cell:pointerdown", function (cellView, e, x, y) {
-        console.log(x,y);
+        let data = cellView.model.getBBox();
+
         $("body").append(
-          '<div id="flyPaper" style="position:fixed;z-index:100;opacity:.7;pointer-event:none;  background-color: #0ae928;   width: auto;   height: auto;"></div>'
-          );
+          '<div id="flyPaper" style="position:fixed;z-index:100;opacity:.7;pointer-event:none;"></div>'
+        );
+        var fly = $("#flyPaper");
         var flyGraph = new dia.Graph({}, { cellNamespace: shapes }),
           flyPaper = new dia.Paper({
             el: $("#flyPaper"),
             model: flyGraph,
+            width: data.width,
+            height: data.height,
             interactive: false,
           }),
           flyShape = cellView.model.clone(),
@@ -657,6 +690,10 @@ function App() {
             // ]);
             graph.addCell(s);
           }
+
+          let jsonObject = graph.toJSON();
+          let jsonString = JSON.stringify(jsonObject);
+          setUndoData((state) => [jsonString, ...state]);
           $("body").off("mousemove.fly").off("mouseup.fly");
           flyShape.remove();
           $("#flyPaper").remove();
@@ -668,7 +705,6 @@ function App() {
 
   // TO HANDLE LINK COLOR
   const handleLinkColor = (color) => {
-    console.log(color,selectLink);
     selectLink.model.attr("line/stroke", color);
   };
 
@@ -754,15 +790,63 @@ function App() {
   };
 
   //TO DOWNLOAD GRAPH INTO IMAGE FORMAT
-  const downloadimage2 = () => {
+  const downloadimage2 = (type) => {
     var canvas = document.getElementById("newcanvas");
-    canvas.style.backgroundColor = "#FFFFFF";
-    var image = canvas.toDataURL("image/png", 1.0);
+    var imgData = canvas.toDataURL("image/jpeg", 1.0);
+    if (type === "jpeg") {
+      canvas.style.backgroundColor = "#FFFFFF";
+      // var image = canvas.toDataURL("image/png", 1.0);
+      var link = document.createElement("a");
+      link.download = "my-image.jpeg";
+      link.href = imgData;
+      link.click();
+    } else if (type === "png") {
+      canvas.style.backgroundColor = "#FFFFFF";
+      var link = document.createElement("a");
+      link.download = "my-image.png";
+      link.href = imgData;
+      link.click();
+    } else if (type === "pdf") {
+      var pdf = new jsPDF();
 
-    var link = document.createElement("a");
-    link.download = "my-image.png";
-    link.href = image;
-    link.click();
+      pdf.addImage(imgData, "JPEG", 0, 0);
+      pdf.save("download.pdf");
+    } else if (type === "svg") {
+      
+      //       var svgDoc = paper.svg;
+      //       var serializer = new XMLSerializer();
+      //       var svgString = serializer.serializeToString(svgDoc)
+      //       console.log("<<<",svgString);
+      // var dataURL = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-350%20-250%20700%20500%22%3E%0A%20%20%20%20%20%20%3Cstyle%20type%3D%22text%2Fcss%22%20media%3D%22screen%22%3E%0A%20%20%20%20%20%20%20%20svg%20%7B%20background%3A%23fff%3B%20%7D%0A%20%20%20%20%20%20%20%20.face%20%7B%20stroke%3A%23000%3B%20stroke-width%3A20px%3B%20stroke-linecap%3Around%20%7D%0A%20%20%20%20%20%20%3C%2Fstyle%3E%0A%20%20%20%20%20%20%3Ccircle%20r%3D%22200%22%20class%3D%22face%22%20fill%3D%22red%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20fill%3D%22none%22%20class%3D%22face%22%20transform%3D%22translate(-396%2C-230)%22%20d%3D%22M487%2C282c-15%2C36-51%2C62-92%2C62%20c-41%2C0-77-25-92-61%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22-60%22%20cy%3D%22-50%22%20r%3D%2220%22%20fill%3D%22%23000%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2260%22%20cy%3D%22-50%22%20r%3D%2220%22%20fill%3D%22%23000%22%2F%3E%0A%20%20%20%20%3C%2Fsvg%3E";
+
+      //       var dataURL = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-350%20-250%20700%20500%22%3E%0A%20%20%20%20%20%20%3Cstyle%20type%3D%22text%2Fcss%22%20media%3D%22screen%22%3E%0A%20%20%20%20%20%20%20%20svg%20%7B%20background%3A%23fff%3B%20%7D%0A%20%20%20%20%20%20%20%20.face%20%7B%20stroke%3A%23000%3B%20stroke-width%3A20px%3B%20stroke-linecap%3Around%20%7D%0A%20%20%20%20%20%20%3C%2Fstyle%3E%0A%20%20%20%20%20%20%3Ccircle%20r%3D%22200%22%20class%3D%22face%22%20fill%3D%22red%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20fill%3D%22none%22%20class%3D%22face%22%20transform%3D%22translate(-396%2C-230)%22%20d%3D%22M487%2C282c-15%2C36-51%2C62-92%2C62%20c-41%2C0-77-25-92-61%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22-60%22%20cy%3D%22-50%22%20r%3D%2220%22%20fill%3D%22%23000%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2260%22%20cy%3D%22-50%22%20r%3D%2220%22%20fill%3D%22%23000%22%2F%3E%0A%20%20%20%20%3C%2Fsvg%3E";
+      // var dl = document.createElement("a");
+      // document.body.appendChild(dl); // This line makes it work in Firefox.
+      // dl.setAttribute("href",svgString );
+      // dl.setAttribute("download", "test.svg");
+      // dl.click();
+      // var encodedData;
+      // var s = new XMLSerializer().serializeToString(
+      //   document.getElementById("paper")
+      // );
+      // encodedData = window.btoa(s);
+      // console.log("encodedData", encodedData);
+      // var canvas = document.getElementById("newcanvas");
+      // var ctx = canvas.getContext("2d");
+  
+      // setTimeout(() => {
+      //   var image = canvas.toDataURL("image/svg", 1.0);
+
+      //   var link = document.createElement("a");
+      //   link.download = "my-image.svg";
+
+      //   link.href = image;
+      //   link.click();
+      // }, 2000);
+    }
+    // canvas.toBlob(function (blob) {
+    //   saveAs(blob, "MyCanvas.svg");
+    // });
   };
 
   const handleAddLine = () => {
@@ -842,6 +926,30 @@ function App() {
       },
     });
   };
+  const handleUndo = () => {
+    if (undoCount <= undoData.length) {
+      let jsonObject = graph.toJSON();
+      let jsonString = JSON.stringify(jsonObject);
+      setRedoData((state) => [jsonString, ...state]);
+      //-----------------------------------------------
+      let data = undoData[undoCount];
+      setUndoCount(undoCount + 1);
+      data = JSON.parse(data);
+      graph.fromJSON(data);
+    } else {
+      alert("NO ");
+    }
+  };
+
+  const handleRedo = () => {
+    setUndoCount(undoCount - 1);
+    if (redoCount < redoData.length) {
+      let data = redoData[redoCount];
+      setRedoCount(redoCount + 1);
+      data = JSON.parse(data);
+      graph.fromJSON(data);
+    }
+  };
   return (
     <div className="main-div">
       <Row className="main-row ">
@@ -861,7 +969,13 @@ function App() {
               ></img>
             </button>
             <Button onClick={handleAddLine} variant="outline-info">
-              Insert Line
+              INSERT LINE
+            </Button>
+            <Button onClick={handleUndo} variant="outline-info">
+              <img width={"30px"} height={"30px"} src="/images/undo.png"></img>
+            </Button>
+            <Button onClick={handleRedo} variant="outline-info">
+              <img width={"30px"} height={"30px"} src="/images/redo.png"></img>
             </Button>
           </div>
           <div className="col2-div">
@@ -1082,7 +1196,7 @@ function App() {
                         handleLinkSize(6);
                       }}
                     >
-                      <img alt="6" width={"100%"}  src="/images/3.png"></img>
+                      <img alt="6" width={"100%"} src="/images/3.png"></img>
                     </div>
                     <div
                       className="thick"
@@ -1109,6 +1223,7 @@ function App() {
           )}
         </Col>
       </Row>
+      <canvas id="newcanvas2"></canvas>
       <Modal
         isOpen={modalIsOpen}
         onAfterOpen={afterOpenModal}
@@ -1121,10 +1236,43 @@ function App() {
           <div className="btndown">
             <Button
               className="btn-danger d-btn mt-5"
-              style={{ marginLeft: "200px" }}
-              onClick={downloadimage2}
+              onClick={() => {
+                downloadimage2("jpeg");
+              }}
             >
-              Download
+              JPEG
+            </Button>
+            <Button
+              className="btn-danger d-btn mt-5"
+              onClick={() => {
+                downloadimage2("png");
+              }}
+            >
+              PNG
+            </Button>
+            <Button
+              className="btn-danger d-btn mt-5"
+              onClick={() => {
+                downloadimage2("svg");
+              }}
+            >
+              SVG
+            </Button>
+            <Button
+              className="btn-danger d-btn mt-5"
+              onClick={() => {
+                downloadimage2("pdf");
+              }}
+            >
+              PDF
+            </Button>
+            <Button
+              className="btn-danger d-btn mt-5"
+              onClick={() => {
+                downloadimage2("autocad");
+              }}
+            >
+              AUTOCAD
             </Button>
           </div>
         </div>

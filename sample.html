@@ -1,23 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <script src="http://code.jquery.com/jquery-latest.js"></script>
+  <script>
+  $(document).ready(function () {
+        var __readLocalXml = function(file)
+        {
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET",file,false);
+            xmlHttp.send();
+            return xmlHttp.responseXML;
+        };
+
+        var __drawSVG = function(context, sourceSVG, x, y){
+            var svg_xml = (new XMLSerializer()).serializeToString(sourceSVG);
+
+            var img = new Image();
+            img.src="";
+            var myFunction = function() {
+                context.drawImage(img, x, y);
+            }
+            img.addEventListener('load', myFunction, false);
+            img.src = "data:image/svg+xml;base64,"+btoa(svg_xml);
+
+        };
+
+        var settings = {
+            //White King
+            //Chess_klt45.svg
+            //<http://en.wikipedia.org/wiki/File:Chess_klt45.svg>
+            'whiteKingSVG'      : function() { return __readLocalXml("svg/Chess_klt45.svg") }
+        }
+
+        var canvas = document.createElement('canvas');
+        var cw = canvas.width = 45;
+        var ch = canvas.height = 45;
+
+        var context = canvas.getContext('2d');
+
+        context.fillStyle = '#FFFFCC';
+        context.fillRect(0,
+                         0,
+                        ch,
+                        cw);
+        __drawSVG(context, settings.whiteKingSVG(),0,0);
+
+        $('#withCanvas').after(canvas);
+        $('#withToDataUrl').after('<img src="' + canvas.toDataURL() + '" />');
+  });
+  </script>
 </head>
 <body>
-    <script type="text/javascript" src="html2canvas-master/dist/html2canvas.js"></script>
-    <div id = ”cpimg”   >  
-        <h4>Welcome</h4>
-     </div>
-     <script>
-        console.log("hiii");
-   html2canvas(document.querySelector('#cpimg')).then((canvas)=>
- {    
-    document.body.appendChild(canvas)
- });
-
-     </script>
+    <h1>Works</h1>
+    <div id="withCanvas"></div>
+    <hr>
+    <h1>Does not Work</h1>
+    <div id="withToDataUrl"></div>
 </body>
 </html>
