@@ -107,6 +107,10 @@ function App() {
   };
   //------------------------------------------------------------->>
 
+  useEffect(()=>{
+    console.log("rrrrrr");
+    console.log(paper);
+  },[paper])
   useEffect(() => {
     let jsonObject = graph.toJSON();
     let jsonString = JSON.stringify(jsonObject);
@@ -138,6 +142,13 @@ function App() {
         width: "100%",
         height: "1000px",
         model: graph,
+        background: {
+          color: 'white',
+          image: '/images/d.png',
+          position:{x:100,y:100}
+          
+          
+       },
 
         cellViewNamespace: shapes,
         defaultLink: () =>
@@ -477,6 +488,12 @@ function App() {
 
     // TO SELECT ELEMENT FROM THE STENCILPAPER
     if (paper) {
+    //   paper.background({
+    //     color: '#6764A7',
+    //     image: 'jointjs-logo.png',
+    //     repeat: 'watermark',
+    //     opacity: 0.3
+    //  })
       //     var line = V("line", {
       //   x1: 1050,
       //   y1: 100,
@@ -578,6 +595,7 @@ function App() {
       });
 
       paper.on("link:pointerdown", (linkView) => {
+        console.log("link");
         linkView.addTools(toolsView2);
         setSizeChange(false);
         setShowColorsoption(true);
@@ -609,8 +627,11 @@ function App() {
 
       paper.on("cell:pointerup", async function (cell) {
         let jsonObject = graph.toJSON();
+        console.log("json",jsonObject);
         let jsonString = JSON.stringify(jsonObject);
         setUndoData((state) => [jsonString, ...state]);
+
+        console.log("paper,",paper);
 
         if (navigator.onLine) {
           const { data } = await axios.post("/user", { data: jsonString });
@@ -635,6 +656,7 @@ function App() {
             width: data.width,
             height: data.height,
             interactive: false,
+            
           }),
           flyShape = cellView.model.clone(),
           pos = cellView.model.position(),
@@ -669,32 +691,19 @@ function App() {
             y > target.top &&
             y < target.top + paper.$el.height()
           ) {
-            var s = flyShape.clone();
-            s.position(x - target.left - offset.x, y - target.top - offset.y);
-            // s.addPorts([
-            //   {
-            //     group: "in",
-            //     attrs: { label: { text: "in1" } },
-            //   },
-            //   {
-            //     group: "in",
-            //     attrs: { label: { text: "in2" } },
-            //   },
-            //   {
-            //     group: "out",
-            //     attrs: { label: { text: "out" } },
-            //   },
-            //   {
-            //     group: "out",
-            //     attrs: { label: { text: "out" } },
-            //   },
-            // ]);
-            graph.addCell(s);
+            var copyShape = flyShape.clone();
+            copyShape.position(x - target.left - offset.x, y - target.top - offset.y);
+          
+
+            graph.addCell(copyShape);
+
           }
 
           let jsonObject = graph.toJSON();
           let jsonString = JSON.stringify(jsonObject);
           setUndoData((state) => [jsonString, ...state]);
+
+          
           $("body").off("mousemove.fly").off("mouseup.fly");
           flyShape.remove();
           $("#flyPaper").remove();
@@ -706,6 +715,8 @@ function App() {
 
   // TO HANDLE LINK COLOR
   const handleLinkColor = (color) => {
+    console.log(color);
+    console.log(selectLink.model);
     selectLink.model.attr("line/stroke", color);
   };
 
@@ -982,12 +993,26 @@ function App() {
             <Button onClick={handleRedo} variant="outline-info">
               <img width={"30px"} height={"30px"} src="/images/redo.png"></img>
             </Button>
+    
           </div>
           <div className="col2-div">
             <div id="paper"></div>
           </div>
         </Col>
         <Col className="col3" sm={12} md={12} lg={2} xl={2}>
+
+          <div style={{width:"100%",height:'50px' ,display:'flex',justifyContent:'space-around'}} >
+            <img  style={{height:'50px'}} src="/images/d.png"  onClick={()=>{
+              console.log("hii");
+              paper._background.image="/images/undo.png"
+              console.log(typeof paper);
+              console.log(paper);
+             setPaper({child:{...paper}})
+             console.log("????",paper);
+            }}></img>
+            <img  style={{height:'50px'}} src="/images/d.png"></img>
+
+          </div>
           <div className="div3"></div>
           {sizeChange && (
             <div className="size">

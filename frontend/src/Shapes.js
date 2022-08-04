@@ -40,7 +40,7 @@ export const circleShape = new shapes.basic.Circle({
   },
   attrs: {
     text: {
-      text: "d",
+      text: "",
     },
   },
   inPorts: [""],
