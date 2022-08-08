@@ -142,7 +142,7 @@ export const subgroup = new shapes.standard.Rectangle({
 subgroup.addPort(subgroupPort1);
 subgroup.addPort(subgroupPort2);
 
-console.log(">sub>",subgroup);
+
 
 
 export let sales = [
